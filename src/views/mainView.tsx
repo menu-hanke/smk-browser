@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-ui/core'
 import DownloadIcon from '@material-ui/icons/CloudDownload'
+import CopyIcon from '@material-ui/icons/FileCopy'
 import { useSnackbar } from 'notistack'
 import LogComponent from '../components/LogComponent'
-import { promises } from 'fs'
 const wkt = require('wkt')
 
 const { ipcRenderer } = window.require('electron');
@@ -20,6 +20,17 @@ const MainView: React.FC = () => {
   const [folderPath, setFolderPath] = React.useState('')
   const [logData, setLogData] = React.useState<Log[]>([])
   const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.3)
+  const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+
+  const copyToClipboard = async () => {
+    let stringToWrite = ''
+    logData.forEach(object => {
+      stringToWrite += (`${object.message}, \n`)
+    })
+    console.log(stringToWrite)
+    const result = await ipcRenderer.invoke('copyToClipboard', { logData: stringToWrite })
+    console.log(result)
+  }
 
   const handleResize = () => {
     setContainerWidth(window.innerWidth * 0.3)
@@ -57,6 +68,7 @@ const MainView: React.FC = () => {
 
   const openFileBrowser = async () => {
     const response = await ipcRenderer.invoke('openFileSystem')
+
     setFolderPath(response)
   }
 
@@ -70,6 +82,8 @@ const MainView: React.FC = () => {
       return
     }
     await getData()
+    const date = new Date()
+    setLogData((logData) => [...logData, { type: 'success', message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!` }])
     enqueueSnackbar('All downlods completed!', { variant: 'success' })
   }
 
@@ -106,13 +120,13 @@ const MainView: React.FC = () => {
 
           // _____ Write files to folder _____
           if (dataAsText.includes('<Error><Message>errCode')) {
-            setLogData((logData) => [...logData, { type: 'error', message: `Kiinteistön ${ID} palstalle ${geometry} ei löytynyt metsävarakuvioita` }])
-            ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: emptyXML }).then((result: any) => {
-            })
+            const date = new Date()
+            setLogData((logData) => [...logData, { type: 'error', message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}` }])
+            ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: emptyXML })
           } else {
-            setLogData((logData) => [...logData, { type: 'success', message: `Lataus kiinteistölle ${ID} palstalla ${geometry} onnistui!` }])
-            ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: dataAsText }).then((result: any) => {
-            })
+            const date = new Date()
+            setLogData((logData) => [...logData, { type: 'success', message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}` }])
+            ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: dataAsText })
           }
         }))
       } catch (error) {
@@ -131,7 +145,7 @@ const MainView: React.FC = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Grid container direction='column' spacing={4} justifyContent='center' alignItems='center'>
+      <Grid container direction='column' spacing={3} justifyContent='center' alignItems='center'>
         <Grid item xs={12}>
           <TextField
             style={{ width: containerWidth }}
@@ -186,11 +200,20 @@ const MainView: React.FC = () => {
         </Grid>
         <Grid item xs={12}>
           <Button
-            style={{ width: containerWidth, padding: '2px' }}
+            style={{ width: containerWidth, height: '50px' }}
             variant='outlined'
             onClick={() => fetchDataAndAlert()}
             endIcon={<DownloadIcon color='primary' />}>
             Download all data
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          <Button
+            style={{ width: containerWidth, height: '50px' }}
+            variant='outlined'
+            onClick={() => copyToClipboard()}
+            endIcon={<CopyIcon color='primary' />}>
+            Copy logs to clipboard
           </Button>
         </Grid>
         <Grid item xs={12}>
