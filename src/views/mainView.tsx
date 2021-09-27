@@ -21,24 +21,7 @@ const MainView: React.FC = () => {
   const [logData, setLogData] = React.useState<Log[]>([])
   const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.3)
   const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-
-  const copyToClipboard = async () => {
-    let stringToWrite = ''
-    logData.forEach(object => {
-      stringToWrite += (`${object.message}, \n`)
-    })
-    console.log(stringToWrite)
-    const result = await ipcRenderer.invoke('copyToClipboard', { logData: stringToWrite })
-    console.log(result)
-  }
-
-  const handleResize = () => {
-    setContainerWidth(window.innerWidth * 0.3)
-  }
-  window.addEventListener('resize', handleResize)
-
   const emptyXML = '<ForestPropertyData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData" xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd"><st:Stands/></ForestPropertyData>'
-
   const versions = [
     {
       value: 'MV1.6',
@@ -58,6 +41,22 @@ const MainView: React.FC = () => {
     },
   ];
 
+
+  //_____ Functionality ______
+  const copyToClipboard = async () => {
+    let stringToWrite = ''
+    logData.forEach(object => {
+      stringToWrite += (`${object.message}, \n`)
+    })
+    const result = await ipcRenderer.invoke('copyToClipboard', { logData: stringToWrite })
+    enqueueSnackbar('Logs copied to clipboard', { variant: 'success' })
+  }
+
+  const handleResize = () => {
+    setContainerWidth(window.innerWidth * 0.3)
+  }
+  window.addEventListener('resize', handleResize)
+
   const standVersionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setForestStandVersion(event.target.value);
   };
@@ -68,7 +67,6 @@ const MainView: React.FC = () => {
 
   const openFileBrowser = async () => {
     const response = await ipcRenderer.invoke('openFileSystem')
-
     setFolderPath(response)
   }
 
@@ -84,7 +82,7 @@ const MainView: React.FC = () => {
     await getData()
     const date = new Date()
     setLogData((logData) => [...logData, { type: 'success', message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!` }])
-    enqueueSnackbar('All downlods completed!', { variant: 'success' })
+    enqueueSnackbar('All downlods completed', { variant: 'success' })
   }
 
   const getData = async () => {
@@ -102,7 +100,6 @@ const MainView: React.FC = () => {
       const data = await response.json()
       const dataString = JSON.stringify(data)
       ipcRenderer.invoke('saveFile', { filename: `mml-${ID}.json`, data: dataString }).then((result: any) => {
-        // console.log('SAVED!', result)
       })
       try {
         await Promise.all(data.features.map(async (geometry: any, index: number) => {
