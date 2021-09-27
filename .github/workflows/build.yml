@@ -46,4 +46,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: application-download
-        path:  D:\a\smk-browser\smk-browser\release-builds\smk-browser-win32-x64
+        path: build/release-builds/smk-browser-win32-x64
