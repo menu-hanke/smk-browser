@@ -3,6 +3,7 @@ import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-
 import DownloadIcon from '@material-ui/icons/CloudDownload'
 import { useSnackbar } from 'notistack'
 import LogComponent from '../components/LogComponent'
+import { promises } from 'fs'
 const wkt = require('wkt')
 
 const { ipcRenderer } = window.require('electron');
@@ -19,7 +20,7 @@ const MainView: React.FC = () => {
   const [folderPath, setFolderPath] = React.useState('')
   const [logData, setLogData] = React.useState<Log[]>([])
 
-  // console.log('Log Data in mainView: ', logData)
+  console.log('Log Data in mainView: ', logData)
 
   const emptyXML = '<ForestPropertyData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData" xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd"><st:Stands/></ForestPropertyData>'
 
@@ -55,6 +56,11 @@ const MainView: React.FC = () => {
     setFolderPath(response)
   }
 
+  const fetchDataAndAlert = async () => {
+    await getData()
+    enqueueSnackbar('All downlods completed!', { variant: 'success' })
+  }
+
   const getData = async () => {
     if (propertyIDs === '') {
       enqueueSnackbar('Please add property IDs', { variant: 'error' })
@@ -65,8 +71,9 @@ const MainView: React.FC = () => {
       return
     }
 
+    setLogData([])
     const arrayOfIDs = propertyIDs.replace(/[\r\n\t]/g, "").split(',').filter(string => string)
-    arrayOfIDs.forEach(async (ID: string, index: number) => {
+    await Promise.all(arrayOfIDs.map(async (ID: string, index: number) => {
 
       // _____ Clear old files from folder _____
       const result = await ipcRenderer.invoke('removeOldFiles', { propertyID: ID })
@@ -81,7 +88,7 @@ const MainView: React.FC = () => {
         // console.log('SAVED!', result)
       })
       try {
-        data.features.forEach(async (geometry: any, index: number) => {
+        await Promise.all(data.features.map(async (geometry: any, index: number) => {
           const WKTPolygon = wkt.stringify(geometry) as string
           const fetchURL = 'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
           const response = await fetch(fetchURL, {
@@ -92,25 +99,24 @@ const MainView: React.FC = () => {
             body: `wktPolygon=${encodeURIComponent(WKTPolygon)}&stdVersion=${forestStandVersion}`
           })
 
-          enqueueSnackbar(`Downloading files for ID: ${ID} `, { variant: 'info' })
           const dataAsText = await response.text()
 
           // _____ Write files to folder _____
           if (dataAsText.includes('<Error><Message>errCode')) {
-            setLogData((logData) => [...logData, { type: 'error', message: `Kiinteistön ${ID} palstalle ${wkt} ei löytynyt metsävarakuvioita` }])
+            setLogData((logData) => [...logData, { type: 'error', message: `Kiinteistön ${ID} palstalle ${geometry} ei löytynyt metsävarakuvioita` }])
             ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: emptyXML }).then((result: any) => {
             })
           } else {
-            setLogData((logData) => [...logData, { type: 'success', message: `Lataus kiinteistölle ${ID} palstalla ${wkt} onnistui!` }])
+            setLogData((logData) => [...logData, { type: 'success', message: `Lataus kiinteistölle ${ID} palstalla ${geometry} onnistui!` }])
             ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: dataAsText }).then((result: any) => {
             })
           }
-        })
+        }))
       } catch (error) {
         enqueueSnackbar(`Error during download: ${error}`, { variant: 'error' })
         console.log(error)
       }
-    })
+    }))
   }
 
   return (
@@ -175,7 +181,7 @@ const MainView: React.FC = () => {
         <Grid item xs={12}>
           <Button
             variant='outlined'
-            onClick={() => getData()}
+            onClick={() => fetchDataAndAlert()}
             endIcon={<DownloadIcon />}>
             Download all data
           </Button>
