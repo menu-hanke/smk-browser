@@ -5,7 +5,6 @@ import { MuiThemeProvider, createTheme } from '@material-ui/core/styles'
 import { green } from '@material-ui/core/colors'
 
 function App() {
-
   const theme = createTheme({
     palette: {
       primary: {
@@ -13,7 +12,6 @@ function App() {
       }
     }
   })
-
 
   return (
     <div>
