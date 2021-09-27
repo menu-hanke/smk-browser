@@ -32,7 +32,7 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
     const log = data.logData[index]
     return (
       <Grid item xs={12} style={style}>
-        <div style={{ color: log.type === 'error' ? 'red' : 'black', fontSize: '12px' }}>
+        <div style={{ color: log.type === 'error' ? 'red' : 'black', fontSize: '12px', margin: '1px' }}>
           {log.message}
         </div>
       </Grid>
@@ -46,7 +46,7 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
           ref={listRef}
           height={logContainerHeight}
           width={logContainerwidth}
-          itemSize={20}
+          itemSize={27}
           itemCount={logData.length}
           itemData={{ logData: logData }}
         >
