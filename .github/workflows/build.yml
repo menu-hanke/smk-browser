@@ -45,5 +45,5 @@ jobs:
     - name: deploy
       uses: actions/upload-artifact@v2
       with:
-        name: application-download
+        name: smk-browser-win32.zip
         path: build/release-builds/smk-browser-win32-x64
