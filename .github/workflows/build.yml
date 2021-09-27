@@ -42,3 +42,8 @@ jobs:
       run: npm run prep-windows
     - name: packager
       run: npm run electron-packager-windows
+    - name: deploy
+      uses: actions/upload-artifact@v2
+      with:
+        name: application-download
+        path: .
