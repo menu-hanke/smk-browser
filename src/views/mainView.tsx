@@ -48,7 +48,7 @@ const MainView: React.FC = () => {
     logData.forEach(object => {
       stringToWrite += (`${object.message}, \n`)
     })
-    const result = await ipcRenderer.invoke('copyToClipboard', { logData: stringToWrite })
+    await ipcRenderer.invoke('copyToClipboard', { logData: stringToWrite })
     enqueueSnackbar('Logs copied to clipboard', { variant: 'success' })
   }
 
