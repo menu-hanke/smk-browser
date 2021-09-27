@@ -70,7 +70,7 @@ const MainView: React.FC = () => {
 
       // _____ Clear old files from folder _____
       const result = await ipcRenderer.invoke('removeOldFiles', { propertyID: ID })
-      // console.log('Old files removed!', result)
+      console.log('Old files removed!', result)
 
       // _____ Download Data ______
       const fetchURL = 'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='

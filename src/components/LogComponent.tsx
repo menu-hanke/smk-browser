@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createStyles, makeStyles } from '@material-ui/styles'
-import { TextField, Grid, List } from '@material-ui/core'
+import { Grid, List } from '@material-ui/core'
 
 interface Log {
   type: string,
