@@ -19,8 +19,12 @@ const MainView: React.FC = () => {
   const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8');
   const [folderPath, setFolderPath] = React.useState('')
   const [logData, setLogData] = React.useState<Log[]>([])
+  const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.3)
 
-  console.log('Log Data in mainView: ', logData)
+  const handleResize = () => {
+    setContainerWidth(window.innerWidth * 0.3)
+  }
+  window.addEventListener('resize', handleResize)
 
   const emptyXML = '<ForestPropertyData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData" xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd"><st:Stands/></ForestPropertyData>'
 
@@ -57,11 +61,6 @@ const MainView: React.FC = () => {
   }
 
   const fetchDataAndAlert = async () => {
-    await getData()
-    enqueueSnackbar('All downlods completed!', { variant: 'success' })
-  }
-
-  const getData = async () => {
     if (propertyIDs === '') {
       enqueueSnackbar('Please add property IDs', { variant: 'error' })
       return
@@ -70,7 +69,11 @@ const MainView: React.FC = () => {
       enqueueSnackbar('Please select folder path', { variant: 'error' })
       return
     }
+    await getData()
+    enqueueSnackbar('All downlods completed!', { variant: 'success' })
+  }
 
+  const getData = async () => {
     setLogData([])
     const arrayOfIDs = propertyIDs.replace(/[\r\n\t]/g, "").split(',').filter(string => string)
     await Promise.all(arrayOfIDs.map(async (ID: string, index: number) => {
@@ -131,6 +134,7 @@ const MainView: React.FC = () => {
       <Grid container direction='column' spacing={4} justifyContent='center' alignItems='center'>
         <Grid item xs={12}>
           <TextField
+            style={{ width: containerWidth }}
             id="outlined-multiline-static"
             label="Property IDs"
             multiline
@@ -144,6 +148,7 @@ const MainView: React.FC = () => {
         </Grid>
         <Grid item xs={12}>
           <TextField
+            style={{ width: containerWidth }}
             id="outlined-select-currency-native"
             select
             label="Version"
@@ -165,6 +170,7 @@ const MainView: React.FC = () => {
         </Grid>
         <Grid item xs={12}>
           <TextField
+            style={{ width: containerWidth }}
             onClick={() => openFileBrowser()}
             id="filled-read-only-input"
             label="Folder path"
@@ -180,9 +186,10 @@ const MainView: React.FC = () => {
         </Grid>
         <Grid item xs={12}>
           <Button
+            style={{ width: containerWidth, padding: '2px' }}
             variant='outlined'
             onClick={() => fetchDataAndAlert()}
-            endIcon={<DownloadIcon />}>
+            endIcon={<DownloadIcon color='primary' />}>
             Download all data
           </Button>
         </Grid>
