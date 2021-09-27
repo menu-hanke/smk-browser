@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, clipboard } from 'electron'
 
 const { ipcMain, dialog } = require('electron')
 const fs = require('fs').promises
@@ -69,4 +69,10 @@ ipcMain.handle('removeOldFiles', async (event, object) => {
   })
   const results = { ok: true }
   return results
+})
+
+ipcMain.handle('copyToClipboard', async (event, object) => {
+  clipboard.writeText(object.logData)
+  console.log(clipboard.readText('selection'))
+  return { ok: true }
 })
