@@ -10,13 +10,15 @@ function App() {
       primary: {
         main: green[700]
       }
+    }, typography: {
+      fontSize: 10,
     }
   })
 
   return (
     <div>
       <MuiThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={5}>
+        <SnackbarProvider maxSnack={3}>
           <MainView />
         </SnackbarProvider>
       </MuiThemeProvider>
