@@ -19,7 +19,8 @@ const MainView: React.FC = () => {
   const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8');
   const [folderPath, setFolderPath] = React.useState('')
   const [logData, setLogData] = React.useState<Log[]>([])
-  const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.3)
+  const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.2)
+
   const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
   const emptyXML = '<ForestPropertyData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData" xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd"><st:Stands/></ForestPropertyData>'
   const versions = [
@@ -53,7 +54,7 @@ const MainView: React.FC = () => {
   }
 
   const handleResize = () => {
-    setContainerWidth(window.innerWidth * 0.3)
+    setContainerWidth(window.innerWidth * 0.2)
   }
   window.addEventListener('resize', handleResize)
 
@@ -142,78 +143,87 @@ const MainView: React.FC = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Grid container direction='column' spacing={3} justifyContent='center' alignItems='center'>
-        <Grid item xs={12}>
-          <TextField
-            style={{ width: containerWidth }}
-            id="outlined-multiline-static"
-            label="Property IDs"
-            multiline
-            rows={4}
-            value={propertyIDs}
-            variant="outlined"
-            onChange={IDchange}
-            defaultValue="Default Value"
-            fullWidth
-          />
+      <Grid container spacing={6} justifyContent='center' alignItems='center' style={{ height: window.innerHeight * 0.7 }}>
+        <Grid container item xs={3} direction='column' alignItems='center' justify='center' spacing={2} style={{ paddingLeft: '3em' }}>
+
+          <Grid item xs={12}>
+            <TextField
+              style={{ width: containerWidth }}
+              id="outlined-multiline-static"
+              label="Property IDs"
+              multiline
+              rows={4}
+              value={propertyIDs}
+              variant="outlined"
+              onChange={IDchange}
+              defaultValue="Default Value"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              style={{ width: containerWidth }}
+              id="outlined-select-currency-native"
+              select
+              label="Version"
+              value={forestStandVersion}
+              onChange={standVersionChange}
+              SelectProps={{
+                native: true,
+              }}
+              helperText="Select version"
+              variant="outlined"
+              fullWidth
+            >
+              {versions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              style={{ width: containerWidth }}
+              onClick={() => openFileBrowser()}
+              id="filled-read-only-input"
+              label="Folder path"
+              defaultValue="Hello World"
+              value={folderPath}
+              InputProps={{
+                readOnly: true,
+              }}
+              variant="outlined"
+              fullWidth
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              style={{ width: containerWidth, height: '50px' }}
+              variant='outlined'
+              onClick={() => fetchDataAndAlert()}
+              endIcon={<DownloadIcon color='primary' />}>
+              <Typography>
+                Download all data
+              </Typography>
+
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              style={{ width: containerWidth, height: '50px' }}
+              variant='outlined'
+              onClick={() => copyToClipboard()}
+              endIcon={<CopyIcon color='primary' />}>
+              <Typography>
+                Copy logs to clipboard
+              </Typography>
+
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <TextField
-            style={{ width: containerWidth }}
-            id="outlined-select-currency-native"
-            select
-            label="Version"
-            value={forestStandVersion}
-            onChange={standVersionChange}
-            SelectProps={{
-              native: true,
-            }}
-            helperText="Select version"
-            variant="outlined"
-            fullWidth
-          >
-            {versions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </TextField>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            style={{ width: containerWidth }}
-            onClick={() => openFileBrowser()}
-            id="filled-read-only-input"
-            label="Folder path"
-            defaultValue="Hello World"
-            value={folderPath}
-            InputProps={{
-              readOnly: true,
-            }}
-            variant="outlined"
-            fullWidth
-            required
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            style={{ width: containerWidth, height: '50px' }}
-            variant='outlined'
-            onClick={() => fetchDataAndAlert()}
-            endIcon={<DownloadIcon color='primary' />}>
-            Download all data
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            style={{ width: containerWidth, height: '50px' }}
-            variant='outlined'
-            onClick={() => copyToClipboard()}
-            endIcon={<CopyIcon color='primary' />}>
-            Copy logs to clipboard
-          </Button>
-        </Grid>
-        <Grid item xs={12}>
+        <Grid container item xs={9} direction='column' alignItems='center' style={{ paddingRight: '3em' }}>
           <LogComponent logData={logData} />
         </Grid>
       </Grid>
