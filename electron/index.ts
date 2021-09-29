@@ -18,11 +18,13 @@ const createWindow = () => {
     }
   })
 
+  window.removeMenu()
+
   if (process.platform === 'win32') {
     window.loadFile(`file://${__dirname}/index.html`)
   }
   window.loadFile(`${__dirname}/index.html`)
-  window.webContents.openDevTools()
+  // window.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {
