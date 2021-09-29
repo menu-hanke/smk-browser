@@ -14,13 +14,13 @@ interface LogComponentInterface {
 
 const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
   const classes = useStyles()
-  const [logContainerwidth, setLogContainerWidth] = React.useState(window.innerWidth * 0.55)
-  const [logContainerHeight, setLogContainerHeight] = React.useState(window.innerHeight * 0.4)
+  const [logContainerwidth, setLogContainerWidth] = React.useState(window.innerWidth * 0.6)
+  const [logContainerHeight, setLogContainerHeight] = React.useState(400)
   const listRef = React.useRef() as any
 
   const handleResize = () => {
-    setLogContainerWidth(window.innerWidth * 0.55)
-    setLogContainerHeight(window.innerHeight * 0.4)
+    setLogContainerWidth(window.innerWidth * 0.6)
+    // setLogContainerHeight(window.innerHeight * 0.45)
   }
   window.addEventListener('resize', handleResize)
 
@@ -46,7 +46,7 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
           ref={listRef}
           height={logContainerHeight}
           width={logContainerwidth}
-          itemSize={27}
+          itemSize={30}
           itemCount={logData.length}
           itemData={{ logData: logData }}
         >
