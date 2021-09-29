@@ -15,7 +15,7 @@ interface LogComponentInterface {
 const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
   const classes = useStyles()
   const [logContainerwidth, setLogContainerWidth] = React.useState(window.innerWidth * 0.6)
-  const [logContainerHeight, setLogContainerHeight] = React.useState(400)
+  const logContainerHeight = 400
   const listRef = React.useRef() as any
 
   const handleResize = () => {
