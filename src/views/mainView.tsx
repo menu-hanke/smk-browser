@@ -123,7 +123,6 @@ const MainView: React.FC = () => {
             ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: emptyXML })
           }
           else if (dataAsText.includes('Palvelu ei ole käytettävissä')) {
-            enqueueSnackbar('Error during download, service not available', { variant: 'error' })
             const date = new Date()
             setLogData((logData) => [...logData, { type: 'error', message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}` }])
           }
