@@ -14,15 +14,7 @@ interface LogComponentInterface {
 
 const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
   const classes = useStyles()
-  const [logContainerwidth, setLogContainerWidth] = React.useState(window.innerWidth * 0.6)
-  const logContainerHeight = 400
   const listRef = React.useRef() as any
-
-  const handleResize = () => {
-    setLogContainerWidth(window.innerWidth * 0.6)
-    // setLogContainerHeight(window.innerHeight * 0.45)
-  }
-  window.addEventListener('resize', handleResize)
 
   React.useEffect(() => {
     listRef.current.scrollToItem(logData.length - 1)
@@ -44,9 +36,9 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
       <Grid container direction='column' className={classes.LogContainer}>
         <FixedSizeList
           ref={listRef}
-          height={logContainerHeight}
-          width={logContainerwidth}
-          itemSize={30}
+          height={400}
+          width={700}
+          itemSize={18}
           itemCount={logData.length}
           itemData={{ logData: logData }}
         >
@@ -63,7 +55,7 @@ const useStyles = makeStyles(() =>
       border: 'solid 1px',
       borderColor: 'rgb(184, 184, 184)',
       borderRadius: 5,
-      padding: '5px',
+
     }
   }))
 
