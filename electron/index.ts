@@ -8,7 +8,7 @@ let selectedPath: string[]
 const createWindow = () => {
   const window = new BrowserWindow({
     width: 1000,
-    height: 670,
+    height: 600,
     backgroundColor: 'white',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
