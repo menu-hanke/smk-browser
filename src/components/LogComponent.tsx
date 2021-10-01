@@ -37,7 +37,7 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
         <FixedSizeList
           ref={listRef}
           height={400}
-          width={700}
+          width={725}
           itemSize={18}
           itemCount={logData.length}
           itemData={{ logData: logData }}
@@ -55,7 +55,6 @@ const useStyles = makeStyles(() =>
       border: 'solid 1px',
       borderColor: 'rgb(184, 184, 184)',
       borderRadius: 5,
-
     }
   }))
 
