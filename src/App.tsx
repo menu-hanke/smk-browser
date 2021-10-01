@@ -18,7 +18,7 @@ function App() {
   return (
     <div>
       <MuiThemeProvider theme={theme}>
-        <SnackbarProvider maxSnack={3}>
+        <SnackbarProvider maxSnack={1}>
           <MainView />
         </SnackbarProvider>
       </MuiThemeProvider>
