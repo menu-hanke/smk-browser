@@ -121,7 +121,13 @@ const MainView: React.FC = () => {
             const date = new Date()
             setLogData((logData) => [...logData, { type: 'error', message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}` }])
             ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: emptyXML })
-          } else {
+          }
+          else if (dataAsText.includes('Palvelu ei ole käytettävissä')) {
+            enqueueSnackbar('Error during download, service not available', { variant: 'error' })
+            const date = new Date()
+            setLogData((logData) => [...logData, { type: 'error', message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}` }])
+          }
+          else {
             const date = new Date()
             setLogData((logData) => [...logData, { type: 'success', message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}` }])
             ipcRenderer.invoke('saveFile', { filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`, data: dataAsText })
@@ -136,7 +142,7 @@ const MainView: React.FC = () => {
 
   return (
     <div >
-      <AppBar position='static' style={{ marginBottom: '60px' }}>
+      <AppBar position='static' style={{ marginBottom: '20px' }}>
         <Toolbar>
           <Typography variant="h6" >
             SMK browser
@@ -170,7 +176,6 @@ const MainView: React.FC = () => {
               SelectProps={{
                 native: true,
               }}
-              helperText="Select version"
               variant="outlined"
               fullWidth
             >
@@ -222,7 +227,7 @@ const MainView: React.FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <Grid container item xs={9} direction='column' alignItems='center' >
+        <Grid container item xs={9} direction='column' alignItems='center' style={{ paddingRight: '20px' }} >
           <LogComponent logData={logData} />
         </Grid>
       </Grid>
