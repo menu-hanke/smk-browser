@@ -76,7 +76,7 @@ const MainView: React.FC = () => {
       enqueueSnackbar('Please add property IDs', { variant: 'error' })
       return
     }
-    if (folderPath === '') {
+    if (folderPath === '' || folderPath === undefined) {
       enqueueSnackbar('Please select folder path', { variant: 'error' })
       return
     }
@@ -136,16 +136,15 @@ const MainView: React.FC = () => {
 
   return (
     <div >
-      <AppBar position='static' style={{ marginBottom: '20px' }}>
+      <AppBar position='static' style={{ marginBottom: '60px' }}>
         <Toolbar>
           <Typography variant="h6" >
             SMK browser
           </Typography>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={6} justifyContent='center' alignItems='center' style={{ height: window.innerHeight * 0.7 }}>
-        <Grid container item xs={3} direction='column' alignItems='center' justify='center' spacing={2} style={{ paddingLeft: '3em' }}>
-
+      <Grid container justifyContent='center' alignItems='center' style={{ height: window.innerHeight * 0.7 }}>
+        <Grid container item xs={3} direction='column' alignItems='center' justify='center' spacing={2} >
           <Grid item xs={12}>
             <TextField
               style={{ width: containerWidth }}
@@ -223,7 +222,7 @@ const MainView: React.FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <Grid container item xs={9} direction='column' alignItems='center' style={{ paddingRight: '3em' }}>
+        <Grid container item xs={9} direction='column' alignItems='center' >
           <LogComponent logData={logData} />
         </Grid>
       </Grid>
