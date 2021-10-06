@@ -5,7 +5,7 @@ This software:
 1.  Downloads files from server based on property IDs
 2. Save the downloaded XML files to a selected folder on users hard drive
 
-APIs used: 
+### APIs used: 
 
 #### MML´s real esteta boundary services API
 - Takes in property IDs and returns boundaries as GeoJSON
