@@ -10,13 +10,11 @@ The purpose of this software is to...
 
 # Running project
 
-After cloning this repo, remember to run
+After cloning this repo, install dependencies
 
 `npm install`
 
-to install dependencies.
-
-To run project locally, execute the following command
+To run project locally, run
 
 `npm run start`
 
