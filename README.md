@@ -26,7 +26,7 @@ In order to view changes made to code, the application needs to be rebuilt and r
 
 # Building locally
 
-To build a executable file locally, following command can be used
+To build an executable file locally, following command can be used
 
 `npx electron-packager <sourcedir> <appname> --platform=<platform>`
 
