@@ -1,14 +1,15 @@
 # Overview
 
-This software:
+### This software:
 
-1.  Downloads files from server based on property IDs
-2. Save the downloaded XML files to a selected folder on users hard drive
+1. Downloads files from server based on property IDs
+2. Saves the downloaded JSON and XML files to a selected folder on users hard drive
 
 ### APIs used: 
 
 #### MML´s real esteta boundary services API
 - Takes in property IDs and returns boundaries as GeoJSON
+- The JSON file is save to users hard drive
 - The returned boundaries are used in next Api request 
 
 #### SMK´s Forest Stand API
