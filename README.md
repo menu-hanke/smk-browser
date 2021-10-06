@@ -12,14 +12,10 @@ MML´s real esteta boundary services API
 
 SMK´s Forest Stand API
 - Takes in boundaries / polygons converted into WKT format and returns forest stands as XML
-- The returned XML is saved to a selected folder on users disc
+- The returned XML -files is saved to users hard drive
 
 
-2. Save the downloaded files to a selected folder 
-
-
-
-
+2. Save the downloaded XML files to a selected folder on users hard drive
 
 
 # Downloadable files
