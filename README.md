@@ -36,8 +36,8 @@ platform options:
 - --platform linux  = linux
 - --platform darwin = mac os x
 
-The build folder can be found from the root directory of the project once the build is finished.
-Note: In order to build mac version, a mac computer is required.
+- The build folder can be found from the root directory of the project once the build is finished.
+- Note: In order to build mac version, a mac computer is required.
 
 # Pipeline and Build
 
