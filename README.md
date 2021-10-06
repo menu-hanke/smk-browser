@@ -7,13 +7,13 @@ The purpose of this software is to:
 
 ### APIs used
 
-The following APIs were used when fetching data
+#### MML´s real esteta boundary services API
+- Takes in property IDs and returns boundaries as GeoJSON
+- The returned boundaries are used in next Api request 
 
-##### MML´s real esteta boundary services API
-
-- which will take in the property IDs and return the boundaries as GeoJSON (used to fetch the forest stands)
-- 
-- SMK´s Forest Stand API, which will take in the boundaries as WKT and return the forest stands as XML (xml files are saved to disc)
+#### SMK´s Forest Stand API
+- Takes in boundaries / polygons converted into WKT format and returns forest stands as XML
+- The returned XML is saved to a selected folder on users disc
 
 
 # Downloadable files
