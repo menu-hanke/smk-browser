@@ -1,11 +1,9 @@
 # Overview
 
-The purpose of this software is to:
+This software:
 
-- Download files from server based on property IDs
-- Save the downloaded files to a selected folder 
-
-### APIs used
+1.  Downloads files from server based on property IDs
+ APIs used: 
 
 #### MML´s real esteta boundary services API
 - Takes in property IDs and returns boundaries as GeoJSON
@@ -14,6 +12,13 @@ The purpose of this software is to:
 #### SMK´s Forest Stand API
 - Takes in boundaries / polygons converted into WKT format and returns forest stands as XML
 - The returned XML is saved to a selected folder on users disc
+
+
+2. Save the downloaded files to a selected folder 
+
+
+
+
 
 
 # Downloadable files
