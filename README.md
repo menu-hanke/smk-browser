@@ -1,6 +1,3 @@
-# This documentation is currently work in progress..
-
-
 # Overview
 
 The purpose of this software is to...
@@ -20,6 +17,12 @@ To run project locally, run
 
 This will build the React application and launch it inside electron.
 
+# Notes regarding development
+
+This project does not support hot reloading out of the box unfortunately.
+In order to view changes made to code, the application needs to be rebuilt and ran again using
+
+`npm run start`
 
 # Building locally
 
