@@ -5,11 +5,11 @@ This software:
 1.  Downloads files from server based on property IDs
  APIs used: 
 
-#### MML´s real esteta boundary services API
+MML´s real esteta boundary services API
 - Takes in property IDs and returns boundaries as GeoJSON
 - The returned boundaries are used in next Api request 
 
-#### SMK´s Forest Stand API
+SMK´s Forest Stand API
 - Takes in boundaries / polygons converted into WKT format and returns forest stands as XML
 - The returned XML is saved to a selected folder on users disc
 
