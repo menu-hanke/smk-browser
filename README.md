@@ -5,6 +5,29 @@ The purpose of this software is to:
 - Download files from server based on property IDs
 - Save the downloaded files to a selected folder 
 
+## APIs used
+
+The following APIs were used when fetching data
+
+- MML´s real esteta boundary services API, which will take in the property IDs and return the boundaries as GeoJSON
+- SMK´s Forest Stand API, which will take in the boundaries as WKT and return the forest stands as XML
+
+## Application logic
+
+
+
+
+
+# Downloadable files
+
+- The executable version can be downloaded from any pipeline that has passed.
+- In order to get the latest version, select the latest build that has passed.
+- The downloadable content can be found at the bottom of the page in 'Artifacts' section of the page. (requires to be signed in to github)
+
+The pipelines can be found under the following link
+
+https://github.com/menu-hanke/smk-browser/actions
+
 # Running project
 
 After cloning this repo, install dependencies
@@ -47,8 +70,4 @@ The pipeline can be found under the following link:
 
 https://github.com/menu-hanke/smk-browser/actions
 
-# Downloadable files
 
-- The executable version can be downloaded from any pipeline that has passed.
-- In order to get the latest version, select the latest build that has passed.
-- The downloadable content can be found at the bottom of the page in 'Artifacts' section of the page. (requires to be signed in to github)
