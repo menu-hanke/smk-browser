@@ -9,12 +9,12 @@
 
 #### MML´s real esteta boundary services API
 - Takes in property IDs and returns boundaries / polygons as GeoJSON
-- The GeoJSON file is save to users hard drive
+- The returned GeoJSON file is saved to user´s hard drive
 - The returned boundaries (GeoJSON) are used in next Api request 
 
 #### SMK´s Forest Stand API
 - Takes in boundaries / polygons converted into WKT format and returns forest stands as XML
-- The returned XML -files is saved to users hard drive
+- The returned XML -files is saved to user´s hard drive
 
 
 # Downloading executable
