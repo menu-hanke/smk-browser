@@ -1,9 +1,9 @@
 # Overview
 
-The purpose of this software is to...
+The purpose of this software is to:
 
-- Download files from server
-- Save the files to selected folder
+- Download files from server based on property IDs
+- Save the downloaded files to a selected folder 
 
 # Running project
 
