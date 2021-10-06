@@ -5,17 +5,13 @@ The purpose of this software is to:
 - Download files from server based on property IDs
 - Save the downloaded files to a selected folder 
 
-## APIs used
+### APIs used
 
 The following APIs were used when fetching data
 
-- MML´s real esteta boundary services API, which will take in the property IDs and return the boundaries as GeoJSON
-- SMK´s Forest Stand API, which will take in the boundaries as WKT and return the forest stands as XML
-
-## Application logic
-
-
-
+- MML´s real esteta boundary services API, which will take in the property IDs and return the boundaries as GeoJSON (used to fetch the forest stands)
+- 
+- SMK´s Forest Stand API, which will take in the boundaries as WKT and return the forest stands as XML (xml files are saved to disc)
 
 
 # Downloadable files
