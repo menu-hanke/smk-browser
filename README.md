@@ -41,8 +41,8 @@ Note: In order to build mac version, a mac computer is required.
 
 # Pipeline and Build
 
-This project contain a pipeline, which will handle building and packaging of the window executable.
-The pipeline will run every time code changes are pushed into the repository and as a result a new version of the executable application is created.
+- This project contain a pipeline, which will handle building and packaging of the window executable.
+- The pipeline will run every time code changes are pushed into the repository and as a result a new version of the executable application is created.
 
 The pipeline can be found under the following link:
 
@@ -50,6 +50,6 @@ https://github.com/menu-hanke/smk-browser/actions
 
 # Downloadable files
 
-The executable version can be downloaded from any pipeline that has passed.
-In order to get the latest version, select the latest build that has passed.
-The downloadable content can be found at the bottom of the page in 'Artifacts' section of the page.
+- The executable version can be downloaded from any pipeline that has passed.
+- In order to get the latest version, select the latest build that has passed.
+- The downloadable content can be found at the bottom of the page in 'Artifacts' section of the page. (requires to be signed in to github)
