@@ -18,7 +18,7 @@ SMK´s Forest Stand API
 2. Save the downloaded XML files to a selected folder on users hard drive
 
 
-# Downloadable files
+# Downloading executable
 
 - The executable version can be downloaded from any pipeline that has passed.
 - In order to get the latest version, select the latest build that has passed.
