@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
             name: SMK-browser
-            path: D:\a\smk-browser\smk-browser\release\app
+            path: D:\a\smk-browser\smk-browser\release\app\build
