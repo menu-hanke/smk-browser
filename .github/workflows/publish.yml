@@ -42,17 +42,18 @@ jobs:
         run: |
           npm run postinstall
           npm run build
-          npm package --win
-          # npm exec electron-builder --publish always --win
+          npm run package --win
+       
 
-      # - name: Archive production artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #       name: SMK-browser
-      #       path: D:\a\smk-browser\smk-browser\release\build\win-unpacked
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+            name: SMK-browser
+            path: D:\a\smk-browser\smk-browser\release\build\win-unpacked
 
           # - name: Archive production artifacts
       #   uses: actions/upload-artifact@v2
       #   with:
       #       name: SMK-browser
       #       path: D:\a\smk-browser\smk-browser\release\build\win-unpacked
+         # npm exec electron-builder --publish always --win
