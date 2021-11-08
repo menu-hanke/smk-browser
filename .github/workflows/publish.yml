@@ -47,4 +47,4 @@ jobs:
             uses: actions/upload-artifact@v2
             with:
               name: SMK-browser
-              path: ./release
+              path: ./release/SMK Browser $.exe
