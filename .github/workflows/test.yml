@@ -30,4 +30,5 @@ jobs:
           npm run package
           npm run lint
           npm exec tsc
+          npm run build:renderer
           npm test
