@@ -1,33 +1,33 @@
-name: Test
+# name: Test
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
-jobs:
-  release:
-    runs-on: ${{ matrix.os }}
+# jobs:
+#   release:
+#     runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+#     strategy:
+#       matrix:
+#         os: [macos-latest, windows-latest, ubuntu-latest]
 
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v1
+#     steps:
+#       - name: Check out Git repository
+#         uses: actions/checkout@v1
 
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
-        with:
-          node-version: 15
+#       - name: Install Node.js, NPM and Yarn
+#         uses: actions/setup-node@v1
+#         with:
+#           node-version: 15
 
-      - name: npm install
-        run: |
-          npm install
+#       - name: npm install
+#         run: |
+#           npm install
 
-      - name: npm test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm run package
-          npm run lint
-          npm exec tsc
-          npm test
+#       - name: npm test
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           npm run package
+#           npm run lint
+#           npm exec tsc
+#           npm test
