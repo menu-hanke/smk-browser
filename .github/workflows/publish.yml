@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [macos-latest]
 
     steps:
       - name: Checkout git repo
@@ -45,6 +45,12 @@ jobs:
           npm exec electron-builder --publish always --win
 
       # - name: Archive production artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #       name: SMK-browser
+      #       path: D:\a\smk-browser\smk-browser\release\build\win-unpacked
+      
+          # - name: Archive production artifacts
       #   uses: actions/upload-artifact@v2
       #   with:
       #       name: SMK-browser
