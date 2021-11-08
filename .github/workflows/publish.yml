@@ -9,7 +9,7 @@ jobs:
   publish:
     # To enable auto publishing to github, update your electron publisher
     # config in package.json > "build" and remove the conditional below
-    if: ${{ github.repository_owner == 'electron-react-boilerplate' }}
+    # if: ${{ github.repository_owner == 'electron-react-boilerplate' }}
 
     runs-on: ${{ matrix.os }}
 
@@ -47,4 +47,4 @@ jobs:
             uses: actions/upload-artifact@v2
             with:
               name: SMK-browser
-              path: ./release/SMK Browser $.exe
+              path: ./release/build/SMK Browser $.exe
