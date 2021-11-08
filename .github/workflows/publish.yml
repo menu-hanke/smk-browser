@@ -45,8 +45,7 @@ jobs:
           npm exec electron-builder -- --publish always --win
 
       - name: Archive production artifacts
-        env:
-          uses: actions/upload-artifact@v2
-          with:
-              name: SMK-browser
-              path: ./release/build/SMK Browser $.exe
+        uses: actions/upload-artifact@v2
+        with:
+            name: SMK-browser
+            path: ./release/build/SMK Browser $.exe
