@@ -40,7 +40,7 @@ const LogComponent: React.FC<LogComponentInterface> = ({ logData }) => {
           width={725}
           itemSize={18}
           itemCount={logData.length}
-          itemData={{ logData: logData }}
+          itemData={{ logData }}
         >
           {renderRow}
         </FixedSizeList>
