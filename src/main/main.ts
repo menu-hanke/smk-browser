@@ -17,7 +17,7 @@ import {
   shell,
   ipcMain,
   dialog,
-  clipboard,
+  clipboard
 } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import fs from 'fs'
