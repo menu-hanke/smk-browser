@@ -27,7 +27,7 @@ jobs:
           node-version: 16
 
       - name: Install dependencies
-        run: |
+        run: 
           npm install
 
       - name: Publish releases
@@ -39,12 +39,14 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           # This is used for uploading release assets to github
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
+        run:
           npm run postinstall
           npm run build
           npm exec electron-builder -- --publish always --win
+
       - name: Archive production artifacts
-            uses: actions/upload-artifact@v2
-            with:
+        env:
+          uses: actions/upload-artifact@v2
+          with:
               name: SMK-browser
               path: ./release/build/SMK Browser $.exe
