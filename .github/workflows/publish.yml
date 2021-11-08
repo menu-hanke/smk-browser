@@ -43,3 +43,8 @@ jobs:
           npm run postinstall
           npm run build
           npm exec electron-builder -- --publish always --win
+      - name: Archive production artifacts
+            uses: actions/upload-artifact@v2
+            with:
+              name: SMK-browser
+              path: ./release
