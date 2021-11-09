@@ -43,7 +43,7 @@ jobs:
           npm run postinstall
           npm run build
           npm run package --win
-          npm exec electron-builder --win --publish always 
+          npm exec electron-builder --win --publish "always" 
        
 
       - name: Archive production artifacts
