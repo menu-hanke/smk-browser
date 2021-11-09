@@ -9,6 +9,7 @@ import { useSnackbar } from 'notistack'
 import wkt from 'wkt'
 import {ipcRenderer} from 'electron'
 import LogComponent from '../components/LogComponent'
+import OpenLayersMap from '../components/OpenLayersMap'
 
 interface Log {
   type: string;
@@ -307,6 +308,7 @@ const MainView: React.FC = () => {
           alignItems="center"
           style={{ paddingRight: '20px' }}
         >
+          <OpenLayersMap/>
           <LogComponent logData={logData} />
         </Grid>
       </Grid>
