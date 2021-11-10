@@ -33,17 +33,14 @@ const OpenLayersMap: React.FC = () => {
     projection: projection
   }
 
-console.log(map)
+  console.log(map)
 
 const initializeOL = React.useCallback(async() => {
   const parser = new WMTSCapabilities()
   const url = 'https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml?api-key='
   const response = await fetch(url + apiKey)
-  console.log('response from fetch: ', response)
   const text = await response.text()
-  console.log('text from response: ', text)
   const result = await parser.read(text)
-  console.log('result from parser: ', result)
 
   let options = optionsFromCapabilities(result, {
     layer: 'maastokartta', // tai 'ortokuva'
@@ -53,11 +50,8 @@ const initializeOL = React.useCallback(async() => {
   if (options && options.urls) {
     const urlToEdit = options.urls[0]
     options.urls[0] = `${urlToEdit}api-key=${apiKey}`
-    console.log('options after edit: ', options)
   }
 
-  console.log('options from catabilities: ', options)
-  console.log('Initializing Open Layers')
   const newMap = new ol.Map({
     target: mapRef.current, 
     layers: [
