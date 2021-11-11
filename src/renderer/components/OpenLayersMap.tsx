@@ -90,8 +90,8 @@ const OpenLayersMap: React.FC = () => {
 const useStyles = makeStyles(() =>
  createStyles({
   mapContainer: {
-   height: '550px',
-   width: '1000px',
+   height: '450px',
+   width: '980px',
    background: 'black'
   }
  })
