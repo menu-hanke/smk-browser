@@ -201,7 +201,7 @@ const MainView: React.FC = () => {
     </Toolbar>
    </AppBar>
    <Grid container justifyContent="center" alignItems="center" style={{ height: window.innerHeight * 0.7 }}>
-    <Grid container item xs={3} direction="column" alignItems="center" justify="center" spacing={2}>
+    <Grid container item xs={3} direction="column" alignItems="center" justifyContent="center" spacing={2}>
      <Grid item xs={12}>
       <TextField
        style={{ width: containerWidth }}

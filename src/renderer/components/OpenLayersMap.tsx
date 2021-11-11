@@ -3,7 +3,7 @@
 /* eslint-disable object-shorthand */
 /* esline-disable react-hooks/exhaustive-deps */
 import * as React from 'react'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@mui/styles'
 import Projection from 'ol/proj/Projection'
 import * as ol from 'ol'
 import 'ol/ol.css'
