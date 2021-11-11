@@ -11,6 +11,8 @@ import wkt from 'wkt'
 import { ipcRenderer } from 'electron'
 import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
+import DropdownSelect from '../components/DropdownSelect'
+import _ from 'lodash'
 
 interface Log {
  type: string
@@ -112,7 +114,8 @@ const MainView: React.FC = () => {
      await Promise.all(
       data.features.map(async (geometry: unknown, index: number) => {
        const WKTPolygon = wkt.stringify(geometry) as string
-       const fetchURL = 'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
+       const fetchURL =
+        'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
        const response = await fetch(fetchURL, {
         headers: {
          'Content-Type': 'application/x-www-form-urlencoded'
@@ -130,7 +133,10 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'error',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(
+           undefined,
+           options as any
+          )}:  No files found for property ID: ${ID} and patch: ${index}`
          }
         ])
         ipcRenderer.invoke('saveFile', {
@@ -143,7 +149,10 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'error',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(
+           undefined,
+           options as any
+          )}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
          }
         ])
        } else {
@@ -152,7 +161,10 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'success',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(
+           undefined,
+           options as any
+          )}:  Download completed for property ID: ${ID} and patch: ${index}`
          }
         ])
         ipcRenderer.invoke('saveFile', {
@@ -200,8 +212,21 @@ const MainView: React.FC = () => {
      <Typography variant="h6">SMK browser</Typography>
     </Toolbar>
    </AppBar>
-   <Grid container justifyContent="center" alignItems="center" style={{ height: window.innerHeight * 0.7 }}>
-    <Grid container item xs={3} direction="column" alignItems="center" justifyContent="center" spacing={2}>
+   <Grid
+    container
+    justifyContent="center"
+    alignItems="center"
+    style={{ height: window.innerHeight * 0.7 }}
+   >
+    <Grid
+     container
+     item
+     xs={3}
+     direction="column"
+     alignItems="center"
+     justifyContent="center"
+     spacing={2}
+    >
      <Grid item xs={12}>
       <TextField
        style={{ width: containerWidth }}
@@ -254,24 +279,46 @@ const MainView: React.FC = () => {
       />
      </Grid>
      <Grid item xs={12}>
-      <Button style={{ width: containerWidth, height: '50px' }} variant="outlined" onClick={() => fetchDataAndAlert()} endIcon={<DownloadIcon color="primary" />}>
+      <Button
+       style={{ width: containerWidth, height: '50px' }}
+       variant="outlined"
+       onClick={() => fetchDataAndAlert()}
+       endIcon={<DownloadIcon color="primary" />}
+      >
        <Typography>Download all data</Typography>
       </Button>
      </Grid>
      <Grid item xs={12}>
-      <Button style={{ width: containerWidth, height: '50px' }} variant="outlined" onClick={() => copyToClipboard()} endIcon={<CopyIcon color="primary" />}>
+      <Button
+       style={{ width: containerWidth, height: '50px' }}
+       variant="outlined"
+       onClick={() => copyToClipboard()}
+       endIcon={<CopyIcon color="primary" />}
+      >
        <Typography>Copy logs to clipboard</Typography>
       </Button>
      </Grid>
+
+     <Grid item xs={12}>
+      <DropdownSelect
+       arrayOfItems={_.cloneDeep(logData)}
+       afterSelectFunction={openModal}
+       isLogData={true}
+      />
+     </Grid>
     </Grid>
-    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '20px' }}>
+    <Grid
+     container
+     item
+     xs={9}
+     direction="column"
+     alignItems="center"
+     style={{ paddingRight: '20px' }}
+    >
      <LogComponent logData={logData} />
     </Grid>
    </Grid>
    <ModalComponent modalIsOpen={modalIsOpen} closeModal={closeModal} />
-   <button type="button" onClick={() => openModal()}>
-    Open Modal
-   </button>
   </div>
  )
 }
