@@ -101,6 +101,16 @@ const createWindow = async () => {
   }
  })
 
+ mainWindow.webContents.on('did-frame-finish-load', () => {
+  // We close the DevTools so that it can be reopened and redux reconnected.
+  // This is a workaround for a bug in redux devtools.
+  mainWindow?.webContents.closeDevTools()
+  mainWindow?.webContents.once('devtools-opened', () => {
+   mainWindow?.focus()
+  })
+  mainWindow?.webContents.openDevTools()
+ })
+
  mainWindow.on('closed', () => {
   mainWindow = null
  })
