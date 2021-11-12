@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as React from 'react'
+import { useDispatch } from 'react-redux'
 import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-ui/core'
 // import ipcRenderer from 'electron';
 import DownloadIcon from '@material-ui/icons/CloudDownload'
@@ -13,6 +14,7 @@ import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
 import _ from 'lodash'
+import { addDataToStore } from '../Store/Actions/data'
 
 interface Log {
  type: string
@@ -20,6 +22,7 @@ interface Log {
 }
 
 const MainView: React.FC = () => {
+ const dispatch = useDispatch()
  const { enqueueSnackbar } = useSnackbar()
  const [propertyIDs, setPropertyIDs] = React.useState('')
  const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8')
@@ -78,6 +81,7 @@ const MainView: React.FC = () => {
 
  const IDchange = (event: React.ChangeEvent<HTMLInputElement>) => {
   setPropertyIDs(event.target.value)
+  dispatch(addDataToStore({ propertyId: event.target.value }))
  }
 
  const openFileBrowser = async () => {
