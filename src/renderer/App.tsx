@@ -1,6 +1,6 @@
 import './App.css'
 import { SnackbarProvider } from 'notistack'
-import { createStore, combineReducers, compose } from 'redux'
+import { createStore, compose } from 'redux'
 
 import { Provider } from 'react-redux'
 import { ThemeProvider } from '@material-ui/core/styles'
@@ -16,8 +16,7 @@ declare global {
 }
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-const rootReducer = combineReducers(dataReducer)
-const store = createStore(rootReducer, composeEnhancers())
+const store = createStore(dataReducer, composeEnhancers())
 
 const App = () => {
  const theme = createTheme({
