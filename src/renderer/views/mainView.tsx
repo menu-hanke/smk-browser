@@ -9,11 +9,14 @@ import CopyIcon from '@material-ui/icons/FileCopy'
 import { useSnackbar } from 'notistack'
 // @ts-ignore
 import wkt from 'wkt'
+import _ from 'lodash'
+import xml2js from 'xml2js'
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { ipcRenderer } from 'electron'
+
 import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
-import _ from 'lodash'
 import { addDataToStore } from '../Store/Actions/data'
 
 interface Log {
@@ -61,6 +64,7 @@ const MainView: React.FC = () => {
  ]
 
  // _____ Functionality ______
+
  const copyToClipboard = async () => {
   let stringToWrite = ''
   logData.forEach((object) => {
@@ -108,6 +112,7 @@ const MainView: React.FC = () => {
      'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
+    console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
     ipcRenderer.invoke('saveFile', {
@@ -116,10 +121,9 @@ const MainView: React.FC = () => {
     })
     try {
      await Promise.all(
-      data.features.map(async (geometry: unknown, index: number) => {
+      data.features.map(async (geometry: any, index: number) => {
        const WKTPolygon = wkt.stringify(geometry) as string
-       const fetchURL =
-        'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
+       const fetchURL = 'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
        const response = await fetch(fetchURL, {
         headers: {
          'Content-Type': 'application/x-www-form-urlencoded'
@@ -130,6 +134,38 @@ const MainView: React.FC = () => {
 
        const dataAsText = await response.text()
 
+       // point = cordinate for given polygon, found from inside of data.features
+
+       // 1. Filter out stands, whose center point is outside of of given geometry
+       // 1.1 Convert XML to JSON
+       const jsonObject = JSON.parse(JSON.stringify(await xml2js.parseStringPromise(dataAsText)))
+       console.log('Forest stands: ', jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'])
+
+       console.log(
+        'forest stand point: ',
+        jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'][0]['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0][
+         'gml:Point'
+        ][0]['gml:coordinates']
+       )
+
+       // 1.2 Filter the stands --> edit json file
+       const filteredJsonObject = jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'].filter((stand: any) => {
+        const pointAsString = stand['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0]['gml:Point'][0]['gml:coordinates']
+        const point = pointAsString[0].split(',').map((value: string) => Number(value))
+        const result = booleanPointInPolygon(point, geometry)
+        return result
+       })
+
+       console.log('filteredSmlAsJson', filteredJsonObject)
+
+       // 1.3 --> TODO Modify javascript object to contain the filtered content
+
+       // 1.4 Convert json back to XML
+       // 1.5 Save the XML filet
+       // 1.6 Update save process state in Redux
+
+       // 2. Filter out stands whose ID has already been saved
+
        // _____ Write files to folder _____
        if (dataAsText.includes('<Error><Message>errCode')) {
         const date = new Date()
@@ -137,10 +173,7 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'error',
-          message: `${date.toLocaleTimeString(
-           undefined,
-           options as any
-          )}:  No files found for property ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
          }
         ])
         ipcRenderer.invoke('saveFile', {
@@ -153,10 +186,7 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'error',
-          message: `${date.toLocaleTimeString(
-           undefined,
-           options as any
-          )}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
          }
         ])
        } else {
@@ -165,10 +195,7 @@ const MainView: React.FC = () => {
          ...logData,
          {
           type: 'success',
-          message: `${date.toLocaleTimeString(
-           undefined,
-           options as any
-          )}:  Download completed for property ID: ${ID} and patch: ${index}`
+          message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
          }
         ])
         ipcRenderer.invoke('saveFile', {
@@ -216,21 +243,8 @@ const MainView: React.FC = () => {
      <Typography variant="h6">SMK browser</Typography>
     </Toolbar>
    </AppBar>
-   <Grid
-    container
-    justifyContent="center"
-    alignItems="center"
-    style={{ height: window.innerHeight * 0.7 }}
-   >
-    <Grid
-     container
-     item
-     xs={3}
-     direction="column"
-     alignItems="center"
-     justifyContent="center"
-     spacing={2}
-    >
+   <Grid container justifyContent="center" alignItems="center" style={{ height: window.innerHeight * 0.7 }}>
+    <Grid container item xs={3} direction="column" alignItems="center" justifyContent="center" spacing={2}>
      <Grid item xs={12}>
       <TextField
        style={{ width: containerWidth }}
@@ -304,21 +318,10 @@ const MainView: React.FC = () => {
      </Grid>
 
      <Grid item xs={12}>
-      <DropdownSelect
-       arrayOfItems={_.cloneDeep(logData)}
-       afterSelectFunction={openModal}
-       isLogData={true}
-      />
+      <DropdownSelect arrayOfItems={_.cloneDeep(logData)} afterSelectFunction={openModal} isLogData={true} />
      </Grid>
     </Grid>
-    <Grid
-     container
-     item
-     xs={9}
-     direction="column"
-     alignItems="center"
-     style={{ paddingRight: '20px' }}
-    >
+    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '20px' }}>
      <LogComponent logData={logData} />
     </Grid>
    </Grid>
