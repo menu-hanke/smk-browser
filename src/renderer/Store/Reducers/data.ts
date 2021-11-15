@@ -5,7 +5,6 @@ const initialState = {
   propertyIds: '',
   forestStandVersion: 'MV1.8',
   folderPath: '',
-  savePath: '',
   filterByGeometry: true,
   filterDuplicates: true,
   logData: {},
@@ -21,9 +20,7 @@ const initialState = {
 
 const dataReducer = createReducer(initialState, {
  ADD_DATA_TO_STORE: (state, action) => {
-  console.log('State before action: ', state)
   state.saveProcess.propertyIds = action.payload.propertyId
-  console.log('State after action: ', state)
  }
 })
 
