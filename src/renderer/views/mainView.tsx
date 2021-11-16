@@ -135,8 +135,6 @@ const MainView: React.FC = () => {
 
        const dataAsText = await response.text()
 
-       // point = cordinate for given polygon, found from inside of data.features
-
        // 1. Filter out stands, whose center point is outside of of given geometry
        // 1.1 Convert XML to JSON
        const jsonObject = await xml2js.parseStringPromise(dataAsText)
@@ -158,15 +156,6 @@ const MainView: React.FC = () => {
        const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
        console.log(jsonObject)
 
-       //  console.log('Forest stands: ', jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'])
-
-       //  console.log(
-       //   'forest stand point: ',
-       //   jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'][0]['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0][
-       //    'gml:Point'
-       //   ][0]['gml:coordinates']
-       //  )
-
        // 1.2 Filter the stands --> edit json file
        const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
         const pointAsString =
@@ -178,24 +167,16 @@ const MainView: React.FC = () => {
         return result
        })
 
-       //  console.log('filteredSmlAsJson', filteredJsonObject)
-
-       //  console.log('jsonObject before filter', jsonObject)
-
        // 1.3 --> TODO Modify javascript object to contain the filtered content
        const baseState = jsonObject
        const editedJsonObject = produce(baseState, (draftState: any) => {
         draftState['ForestPropertyData']['st:Stands'][0]['st:Stand'] = filteredJsonObject
        })
 
-       //  console.log('jsonObject after filter', editedJsonObject)
-
        // 1.4 Convert json back to XML
        const builder = new xml2js.Builder()
-
-       const XML = builder.buildObject(editedJsonObject)
-
-       console.log('converted XML: ', XML)
+       const filteredXml = builder.buildObject(editedJsonObject)
+       console.log('converted XML: ', filteredXml)
 
        // 1.5 Save the XML file
        // 1.6 Update save process state in Redux
