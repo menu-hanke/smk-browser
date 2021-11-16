@@ -139,6 +139,11 @@ const MainView: React.FC = () => {
        // 1.1 Convert XML to JSON
        const jsonObject = await xml2js.parseStringPromise(dataAsText)
 
+       console.log('xml before filter', dataAsText)
+
+       /* 
+          _____ Function for reading prefix from XML file _____
+       */
        const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
         const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
         const keyAsString = String(key)
@@ -147,44 +152,41 @@ const MainView: React.FC = () => {
         } else return null
        }
 
-       //_____ Reading Namespaces from XML file _____
        const xmlNsStand = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
-       const xmlNsGeometricDataTypes = getNamespacePrefix(
-        jsonObject['ForestPropertyData'],
-        'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes'
-       )
+       const xmlNsGeometricDataTypes = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes')
        const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
        console.log(jsonObject)
 
-       // 1.2 Filter the stands --> edit json file
+       /* 
+          1.2 Filter the stands --> edit json file 
+       */
        const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
         const pointAsString =
-         stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][
-          `${xmlNsGml}:coordinates`
-         ]
+         stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][`${xmlNsGml}:coordinates`]
         const point = pointAsString[0].split(',').map((value: string) => Number(value))
         const result = booleanPointInPolygon(point, geometry)
         return result
        })
 
-       // 1.3 --> TODO Modify javascript object to contain the filtered content
+       // 1.3 Modify the jsonObject to contain the new filtered array
        const baseState = jsonObject
        const editedJsonObject = produce(baseState, (draftState: any) => {
-        draftState['ForestPropertyData']['st:Stands'][0]['st:Stand'] = filteredJsonObject
+        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = filteredJsonObject
        })
 
-       // 1.4 Convert json back to XML
+       // 1.4 Convert Json back to XML
        const builder = new xml2js.Builder()
        const filteredXml = builder.buildObject(editedJsonObject)
-       console.log('converted XML: ', filteredXml)
+       console.log('filtered XML: ', filteredXml)
 
-       // 1.5 Save the XML file
        // 1.6 Update save process state in Redux
 
        // 2. Filter out stands whose ID has already been saved
 
+       // 1.5 Save the XML file
+
        // _____ Write files to folder _____
-       if (dataAsText.includes('<Error><Message>errCode')) {
+       if (filteredXml.includes('<Error><Message>errCode')) {
         const date = new Date()
         setLogData((logData) => [
          ...logData,
@@ -197,7 +199,7 @@ const MainView: React.FC = () => {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
          data: emptyXML
         })
-       } else if (dataAsText.includes('Palvelu ei ole käytettävissä')) {
+       } else if (filteredXml.includes('Palvelu ei ole käytettävissä')) {
         const date = new Date()
         setLogData((logData) => [
          ...logData,
@@ -217,7 +219,7 @@ const MainView: React.FC = () => {
         ])
         ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
-         data: dataAsText
+         data: filteredXml
         })
        }
       })
@@ -314,22 +316,12 @@ const MainView: React.FC = () => {
       />
      </Grid>
      <Grid item xs={12}>
-      <Button
-       style={{ width: containerWidth, height: '50px' }}
-       variant="outlined"
-       onClick={() => fetchDataAndAlert()}
-       endIcon={<DownloadIcon color="primary" />}
-      >
+      <Button style={{ width: containerWidth, height: '50px' }} variant="outlined" onClick={() => fetchDataAndAlert()} endIcon={<DownloadIcon color="primary" />}>
        <Typography>Download all data</Typography>
       </Button>
      </Grid>
      <Grid item xs={12}>
-      <Button
-       style={{ width: containerWidth, height: '50px' }}
-       variant="outlined"
-       onClick={() => copyToClipboard()}
-       endIcon={<CopyIcon color="primary" />}
-      >
+      <Button style={{ width: containerWidth, height: '50px' }} variant="outlined" onClick={() => copyToClipboard()} endIcon={<CopyIcon color="primary" />}>
        <Typography>Copy logs to clipboard</Typography>
       </Button>
      </Grid>
