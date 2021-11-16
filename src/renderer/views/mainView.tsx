@@ -12,6 +12,7 @@ import wkt from 'wkt'
 import _ from 'lodash'
 import xml2js from 'xml2js'
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
+import { produce } from 'immer'
 import { ipcRenderer } from 'electron'
 
 import LogComponent from '../components/LogComponent'
@@ -138,30 +139,65 @@ const MainView: React.FC = () => {
 
        // 1. Filter out stands, whose center point is outside of of given geometry
        // 1.1 Convert XML to JSON
-       const jsonObject = JSON.parse(JSON.stringify(await xml2js.parseStringPromise(dataAsText)))
-       console.log('Forest stands: ', jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'])
+       const jsonObject = await xml2js.parseStringPromise(dataAsText)
 
-       console.log(
-        'forest stand point: ',
-        jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'][0]['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0][
-         'gml:Point'
-        ][0]['gml:coordinates']
+       const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
+        const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
+        const keyAsString = String(key)
+        if (keyAsString.indexOf('xmlns:') === 0) {
+         return keyAsString.slice(6)
+        } else return null
+       }
+
+       //_____ Reading Namespaces from XML file _____
+       const xmlNsStand = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
+       const xmlNsGeometricDataTypes = getNamespacePrefix(
+        jsonObject['ForestPropertyData'],
+        'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes'
        )
+       const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
+       console.log(jsonObject)
+
+       //  console.log('Forest stands: ', jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'])
+
+       //  console.log(
+       //   'forest stand point: ',
+       //   jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'][0]['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0][
+       //    'gml:Point'
+       //   ][0]['gml:coordinates']
+       //  )
 
        // 1.2 Filter the stands --> edit json file
-       const filteredJsonObject = jsonObject['ForestPropertyData']['st:Stands'][0]['st:Stand'].filter((stand: any) => {
-        const pointAsString = stand['st:StandBasicData'][0]['gdt:PolygonGeometry'][0]['gml:pointProperty'][0]['gml:Point'][0]['gml:coordinates']
+       const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
+        const pointAsString =
+         stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][
+          `${xmlNsGml}:coordinates`
+         ]
         const point = pointAsString[0].split(',').map((value: string) => Number(value))
         const result = booleanPointInPolygon(point, geometry)
         return result
        })
 
-       console.log('filteredSmlAsJson', filteredJsonObject)
+       //  console.log('filteredSmlAsJson', filteredJsonObject)
+
+       //  console.log('jsonObject before filter', jsonObject)
 
        // 1.3 --> TODO Modify javascript object to contain the filtered content
+       const baseState = jsonObject
+       const editedJsonObject = produce(baseState, (draftState: any) => {
+        draftState['ForestPropertyData']['st:Stands'][0]['st:Stand'] = filteredJsonObject
+       })
+
+       //  console.log('jsonObject after filter', editedJsonObject)
 
        // 1.4 Convert json back to XML
-       // 1.5 Save the XML filet
+       const builder = new xml2js.Builder()
+
+       const XML = builder.buildObject(editedJsonObject)
+
+       console.log('converted XML: ', XML)
+
+       // 1.5 Save the XML file
        // 1.6 Update save process state in Redux
 
        // 2. Filter out stands whose ID has already been saved
