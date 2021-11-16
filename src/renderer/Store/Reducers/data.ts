@@ -2,7 +2,7 @@ import { createReducer } from '@reduxjs/toolkit'
 
 const initialState = {
  beforeFetch: {
-  propertyIds: '',
+  propertyIds: [''],
   forestStandVersion: 'MV1.8',
   folderPath: '',
   removeDuplicates: true
@@ -37,7 +37,7 @@ const initialState = {
 
 const dataReducer = createReducer(initialState, {
  ADD_DATA_TO_STORE: (state, action) => {
-  state.saveProcess.propertyIds = action.payload.propertyId
+  state.beforeFetch.propertyIds.push(action.payload.propertyId)
  }
 })
 
