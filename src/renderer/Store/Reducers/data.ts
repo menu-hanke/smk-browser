@@ -38,7 +38,7 @@ const dataReducer = createReducer(initialState, {
   })
  },
  SAVE_FOUND_STAND_IDS: (state, action) => {
-  state.saveProcess.foundStandIds = [...state.saveProcess.foundStandIds.concat(action.payload.foundStandIds)]
+  state.saveProcess.foundStandIds = state.saveProcess.foundStandIds.concat(action.payload.foundStandIds)
  }
 })
 
