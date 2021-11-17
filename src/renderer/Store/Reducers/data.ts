@@ -1,15 +1,20 @@
 import { createReducer } from '@reduxjs/toolkit'
 
+interface Log {
+ type: string
+ message: string
+}
+
 const initialState = {
  beforeFetch: {
-  propertyIds: [''],
+  propertyIds: '',
   forestStandVersion: 'MV1.8',
   folderPath: '',
   removeDuplicates: true
  },
 
  saveProcess: {
-  logData: [],
+  logData: [] as Log[],
   foundStandIds: [] as string[], // This is used for remove duplicates filtering process
   foundIDs: [] as any[]
  },
@@ -25,10 +30,7 @@ const initialState = {
 }
 
 const dataReducer = createReducer(initialState, {
- ADD_DATA_TO_STORE: (state, action) => {
-  state.beforeFetch.propertyIds.push(action.payload.propertyId)
- },
- SAVE_FOUND_ID: (state, action) => {
+ SET_FOUND_ID: (state, action) => {
   if (state.saveProcess.foundIDs.find((object) => object.propertyId === action.payload.propertyId)) {
    return
   }
@@ -37,8 +39,23 @@ const dataReducer = createReducer(initialState, {
    geojsonFile: action.payload.geojsonFile
   })
  },
- SAVE_FOUND_STAND_IDS: (state, action) => {
+ SET_FOUND_STAND_IDS: (state, action) => {
   state.saveProcess.foundStandIds = state.saveProcess.foundStandIds.concat(action.payload.foundStandIds)
+ },
+ SET_PROPERTY_IDS: (state, action) => {
+  state.beforeFetch.propertyIds = action.payload.propertyIds
+ },
+ SET_FOREST_STAND_VERSION: (state, action) => {
+  state.beforeFetch.forestStandVersion = action.payload.forestStandVersion
+ },
+ SET_FOLDER_PATH: (state, action) => {
+  state.beforeFetch.folderPath = action.payload.folderPath
+ },
+ SET_LOG_DATA: (state, action) => {
+  state.saveProcess.logData = [...state.saveProcess.logData, action.payload.logData]
+ },
+ SET_MODAL_STATE: (state, action) => {
+  state.map.displayMap = action.payload.displayMap
  }
 })
 
