@@ -41,6 +41,7 @@ const MainView: React.FC = () => {
  const closeModal = () => setModalIsOpen(false)
 
  const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
+ const removeDuplicatesState = useSelector((state: RootState) => state.beforeFetch.removeDuplicates)
 
  const options = {
   weekday: 'short',
@@ -137,18 +138,12 @@ const MainView: React.FC = () => {
         method: 'POST',
         body: `wktPolygon=${encodeURIComponent(WKTPolygon)}&stdVersion=${forestStandVersion}`
        })
-
        const dataAsText = await response.text()
 
-       // 1. Filter out stands, whose center point is outside of of given geometry
-       // 1.1 Convert XML to JSON
-       const jsonObject = await xml2js.parseStringPromise(dataAsText)
+       // 1. Convert XML to JSON
+       let jsonObject = await xml2js.parseStringPromise(dataAsText)
 
-       //  console.log('xml before filter', dataAsText)
-
-       /* 
-          _____ Function for reading prefix from XML file _____
-       */
+       //_____ Function for reading prefix from XML file _____
        const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
         const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
         const keyAsString = String(key)
@@ -157,14 +152,11 @@ const MainView: React.FC = () => {
         } else return null
        }
 
+       // _____ Filtering functions _____
        const xmlNsStand = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
        const xmlNsGeometricDataTypes = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes')
        const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
        console.log(jsonObject)
-
-       /* 
-          1.2 Filter the stands --> edit json file 
-       */
 
        const removeStandsIfPointInPolygon = (jsonObject: any, geometry: any) => {
         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
@@ -182,43 +174,37 @@ const MainView: React.FC = () => {
         if (arrayOfStandIds.length === 0) {
          return jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`]
         } else {
-         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter(
-          (stand: any) => stand['$'].id === arrayOfStandIds.find((id) => id === stand['$'].id)
-         )
+         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => !arrayOfStandIds.find((id) => id === stand['$'].id))
          return filteredJsonObject
         }
        }
 
-       console.log('jsonObject before filter: ', jsonObject)
-
-       const firstFilterObject: any = produce(jsonObject, (draftState: any) => {
+       // 2. Filter out stand that are not inside the property
+       jsonObject = produce(jsonObject, (draftState: any) => {
         draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeStandsIfPointInPolygon(jsonObject, geometry)
        })
-       console.log('jsonObject after first filter: ', firstFilterObject)
 
-       const secondFilterObject: any = produce(firstFilterObject, (draftState: any) => {
-        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(firstFilterObject, foundStandIds)
-       })
-       console.log('jsonObject after second filter: ', secondFilterObject)
+       if (removeDuplicatesState === true) {
+        // 2.1 Filter out stands whose ID has already been saved
+        jsonObject = produce(jsonObject, (draftState: any) => {
+         draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(jsonObject, foundStandIds)
+         console.log('Json object after second filter: ', jsonObject)
+        })
+       }
 
-       // Save ID:s of the stands that are to be saved to Redux
-       const arrayOfStandIds = secondFilterObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
+       // 3. Save ID:s of the stands that are to be saved to Redux
+       const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
        dispatch(saveFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
        console.log('array of stand IDs: ', arrayOfStandIds)
-       // 1.4 Convert Json back to XML
+       // 4. Convert Json back to XML
        const builder = new xml2js.Builder()
-       const filteredXml = builder.buildObject(secondFilterObject)
-       //  console.log('filtered XML: ', filteredXml)
+       const filteredXml = builder.buildObject(jsonObject)
 
-       // 1.6 Update save process state in Redux
+       // 5. Update save process state in Redux
        dispatch(saveFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
-       // 2. Filter out stands whose ID has already been saved
-
-       // 1.5 Save the XML file
-
-       // _____ Write files to folder _____
+       // 6. write files to folder
        if (filteredXml.includes('<Error><Message>errCode')) {
         const date = new Date()
         setLogData((logData) => [
