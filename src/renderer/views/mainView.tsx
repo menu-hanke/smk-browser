@@ -25,20 +25,12 @@ import { RootState } from 'renderer/App'
 const MainView: React.FC = () => {
  const dispatch = useDispatch()
  const { enqueueSnackbar } = useSnackbar()
- //  const [propertyIDs, setPropertyIDs] = React.useState('')
- //  const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8')
- //  const [folderPath, setFolderPath] = React.useState('')
- //  const [logData, setLogData] = React.useState<Log[]>([])
  const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.2)
- //  const [modalIsOpen, setModalIsOpen] = React.useState(false)
- //  const openModal = () => setModalIsOpen(true)
- //  const closeModal = () => setModalIsOpen(false)
 
  const propertyIDs = useSelector((state: RootState) => state.beforeFetch.propertyIds)
  const forestStandVersion = useSelector((state: RootState) => state.beforeFetch.forestStandVersion)
  const folderPath = useSelector((state: RootState) => state.beforeFetch.folderPath)
  const logData = useSelector((state: RootState) => state.saveProcess.logData)
-
  const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
  const removeDuplicatesState = useSelector((state: RootState) => state.beforeFetch.removeDuplicates)
 
@@ -213,14 +205,6 @@ const MainView: React.FC = () => {
           }
          })
         )
-
-        // setLogData((logData) => [
-        //  ...logData,
-        //  {
-        //   type: 'error',
-        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
-        //  }
-        // ])
         ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
          data: emptyXML
@@ -235,14 +219,6 @@ const MainView: React.FC = () => {
           }
          })
         )
-
-        // setLogData((logData) => [
-        //  ...logData,
-        //  {
-        //   type: 'error',
-        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
-        //  }
-        // ])
        } else {
         const date = new Date()
         dispatch(
@@ -253,14 +229,6 @@ const MainView: React.FC = () => {
           }
          })
         )
-
-        // setLogData((logData) => [
-        //  ...logData,
-        //  {
-        //   type: 'success',
-        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
-        //  }
-        // ])
         ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
          data: filteredXml
@@ -297,14 +265,6 @@ const MainView: React.FC = () => {
     }
    })
   )
-
-  // setLogData((logData) => [
-  //  ...logData,
-  //  {
-  //   type: 'success',
-  //   message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!`
-  //  }
-  // ])
   enqueueSnackbar('All downlods completed', { variant: 'success' })
  }
 
