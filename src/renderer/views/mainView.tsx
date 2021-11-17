@@ -18,27 +18,26 @@ import { ipcRenderer } from 'electron'
 import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
-import { addDataToStore } from '../Store/Actions/data'
 
-import { saveFoundId, saveFoundStandIds } from '../Store/Actions/data'
+import { setFoundId, setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
-
-interface Log {
- type: string
- message: string
-}
 
 const MainView: React.FC = () => {
  const dispatch = useDispatch()
  const { enqueueSnackbar } = useSnackbar()
- const [propertyIDs, setPropertyIDs] = React.useState('')
- const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8')
- const [folderPath, setFolderPath] = React.useState('')
- const [logData, setLogData] = React.useState<Log[]>([])
+ //  const [propertyIDs, setPropertyIDs] = React.useState('')
+ //  const [forestStandVersion, setForestStandVersion] = React.useState('MV1.8')
+ //  const [folderPath, setFolderPath] = React.useState('')
+ //  const [logData, setLogData] = React.useState<Log[]>([])
  const [containerWidth, setContainerWidth] = React.useState(window.innerWidth * 0.2)
- const [modalIsOpen, setModalIsOpen] = React.useState(false)
- const openModal = () => setModalIsOpen(true)
- const closeModal = () => setModalIsOpen(false)
+ //  const [modalIsOpen, setModalIsOpen] = React.useState(false)
+ //  const openModal = () => setModalIsOpen(true)
+ //  const closeModal = () => setModalIsOpen(false)
+
+ const propertyIDs = useSelector((state: RootState) => state.beforeFetch.propertyIds)
+ const forestStandVersion = useSelector((state: RootState) => state.beforeFetch.forestStandVersion)
+ const folderPath = useSelector((state: RootState) => state.beforeFetch.folderPath)
+ const logData = useSelector((state: RootState) => state.saveProcess.logData)
 
  const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
  const removeDuplicatesState = useSelector((state: RootState) => state.beforeFetch.removeDuplicates)
@@ -87,25 +86,24 @@ const MainView: React.FC = () => {
  window.addEventListener('resize', handleResize)
 
  const standVersionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setForestStandVersion(event.target.value)
+  dispatch(setForestStandVersion({ forestStandVersion: event.target.value }))
  }
 
  const IDchange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setPropertyIDs(event.target.value)
-  dispatch(addDataToStore({ propertyId: event.target.value }))
+  dispatch(setPropertyIds({ propertyIds: event.target.value }))
  }
 
  const openFileBrowser = async () => {
   const response = await ipcRenderer.invoke('openFileSystem')
-  setFolderPath(response)
+  dispatch(setFolderPath({ folderPath: response }))
  }
 
  const getData = async () => {
-  setLogData([])
+  dispatch(setLogData({ logData: [] }))
   const arrayOfIDs = propertyIDs
    .replace(/[\r\n\t]/g, '')
    .split(',')
-   .filter((string) => string)
+   .filter((string: string) => string)
   await Promise.all(
    arrayOfIDs.map(async (ID: string) => {
     // _____ Clear old files from folder _____
@@ -194,7 +192,7 @@ const MainView: React.FC = () => {
 
        // 3. Save ID:s of the stands that are to be saved to Redux
        const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
-       dispatch(saveFoundStandIds({ foundStandIds: arrayOfStandIds }))
+       dispatch(setFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
        console.log('array of stand IDs: ', arrayOfStandIds)
        // 4. Convert Json back to XML
@@ -202,40 +200,67 @@ const MainView: React.FC = () => {
        const filteredXml = builder.buildObject(jsonObject)
 
        // 5. Update save process state in Redux
-       dispatch(saveFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
+       dispatch(setFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
        // 6. write files to folder
        if (filteredXml.includes('<Error><Message>errCode')) {
         const date = new Date()
-        setLogData((logData) => [
-         ...logData,
-         {
-          type: 'error',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
-         }
-        ])
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'error',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
+
+        // setLogData((logData) => [
+        //  ...logData,
+        //  {
+        //   type: 'error',
+        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
+        //  }
+        // ])
         ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
          data: emptyXML
         })
        } else if (filteredXml.includes('Palvelu ei ole käytettävissä')) {
         const date = new Date()
-        setLogData((logData) => [
-         ...logData,
-         {
-          type: 'error',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
-         }
-        ])
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'error',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
+
+        // setLogData((logData) => [
+        //  ...logData,
+        //  {
+        //   type: 'error',
+        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
+        //  }
+        // ])
        } else {
         const date = new Date()
-        setLogData((logData) => [
-         ...logData,
-         {
-          type: 'success',
-          message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
-         }
-        ])
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'success',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
+
+        // setLogData((logData) => [
+        //  ...logData,
+        //  {
+        //   type: 'success',
+        //   message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
+        //  }
+        // ])
         ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
          data: filteredXml
@@ -264,13 +289,22 @@ const MainView: React.FC = () => {
   }
   await getData()
   const date = new Date()
-  setLogData((logData) => [
-   ...logData,
-   {
-    type: 'success',
-    message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!`
-   }
-  ])
+  dispatch(
+   setLogData({
+    logData: {
+     type: 'success',
+     message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!`
+    }
+   })
+  )
+
+  // setLogData((logData) => [
+  //  ...logData,
+  //  {
+  //   type: 'success',
+  //   message: `${date.toLocaleDateString(undefined, options as any)} All downloads complete!`
+  //  }
+  // ])
   enqueueSnackbar('All downlods completed', { variant: 'success' })
  }
 
@@ -346,14 +380,14 @@ const MainView: React.FC = () => {
      </Grid>
 
      <Grid item xs={12}>
-      <DropdownSelect afterSelectFunction={openModal} />
+      <DropdownSelect />
      </Grid>
     </Grid>
     <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '20px' }}>
      <LogComponent logData={logData} />
     </Grid>
    </Grid>
-   <ModalComponent modalIsOpen={modalIsOpen} closeModal={closeModal} />
+   <ModalComponent />
   </div>
  )
 }
