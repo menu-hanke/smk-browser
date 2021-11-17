@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-ui/core'
 // import ipcRenderer from 'electron';
 import DownloadIcon from '@material-ui/icons/CloudDownload'
@@ -20,6 +20,9 @@ import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
 import { addDataToStore } from '../Store/Actions/data'
 
+import { saveFoundId, saveFoundStandIds } from '../Store/Actions/data'
+import { RootState } from 'renderer/App'
+
 interface Log {
  type: string
  message: string
@@ -36,6 +39,8 @@ const MainView: React.FC = () => {
  const [modalIsOpen, setModalIsOpen] = React.useState(false)
  const openModal = () => setModalIsOpen(true)
  const closeModal = () => setModalIsOpen(false)
+
+ const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
 
  const options = {
   weekday: 'short',
@@ -113,7 +118,7 @@ const MainView: React.FC = () => {
      'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
-    console.log('Data from first API call: ', data)
+    // console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
     ipcRenderer.invoke('saveFile', {
@@ -139,7 +144,7 @@ const MainView: React.FC = () => {
        // 1.1 Convert XML to JSON
        const jsonObject = await xml2js.parseStringPromise(dataAsText)
 
-       console.log('xml before filter', dataAsText)
+       //  console.log('xml before filter', dataAsText)
 
        /* 
           _____ Function for reading prefix from XML file _____
@@ -160,26 +165,54 @@ const MainView: React.FC = () => {
        /* 
           1.2 Filter the stands --> edit json file 
        */
-       const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
-        const pointAsString =
-         stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][`${xmlNsGml}:coordinates`]
-        const point = pointAsString[0].split(',').map((value: string) => Number(value))
-        const result = booleanPointInPolygon(point, geometry)
-        return result
-       })
 
-       // 1.3 Modify the jsonObject to contain the new filtered array
-       const baseState = jsonObject
-       const editedJsonObject = produce(baseState, (draftState: any) => {
-        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = filteredJsonObject
-       })
+       const removeStandsIfPointInPolygon = (jsonObject: any, geometry: any) => {
+        const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
+         const pointAsString =
+          stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][`${xmlNsGml}:coordinates`]
+         const point = pointAsString[0].split(',').map((value: string) => Number(value))
+         const result = booleanPointInPolygon(point, geometry)
+         return result
+        })
+        return filteredJsonObject
+       }
 
+       // ______ This function will remove duplicates from downloaded forest stands ______
+       const removeDuplicates = (jsonObject: any, arrayOfStandIds: string[]) => {
+        if (arrayOfStandIds.length === 0) {
+         return jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`]
+        } else {
+         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter(
+          (stand: any) => stand['$'].id === arrayOfStandIds.find((id) => id === stand['$'].id)
+         )
+         return filteredJsonObject
+        }
+       }
+
+       console.log('jsonObject before filter: ', jsonObject)
+
+       const firstFilterObject: any = produce(jsonObject, (draftState: any) => {
+        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeStandsIfPointInPolygon(jsonObject, geometry)
+       })
+       console.log('jsonObject after first filter: ', firstFilterObject)
+
+       const secondFilterObject: any = produce(firstFilterObject, (draftState: any) => {
+        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(firstFilterObject, foundStandIds)
+       })
+       console.log('jsonObject after second filter: ', secondFilterObject)
+
+       // Save ID:s of the stands that are to be saved to Redux
+       const arrayOfStandIds = secondFilterObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
+       dispatch(saveFoundStandIds({ foundStandIds: arrayOfStandIds }))
+
+       console.log('array of stand IDs: ', arrayOfStandIds)
        // 1.4 Convert Json back to XML
        const builder = new xml2js.Builder()
-       const filteredXml = builder.buildObject(editedJsonObject)
-       console.log('filtered XML: ', filteredXml)
+       const filteredXml = builder.buildObject(secondFilterObject)
+       //  console.log('filtered XML: ', filteredXml)
 
        // 1.6 Update save process state in Redux
+       dispatch(saveFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
        // 2. Filter out stands whose ID has already been saved
 
@@ -327,7 +360,7 @@ const MainView: React.FC = () => {
      </Grid>
 
      <Grid item xs={12}>
-      <DropdownSelect arrayOfItems={_.cloneDeep(logData)} afterSelectFunction={openModal} isLogData={true} />
+      <DropdownSelect afterSelectFunction={openModal} />
      </Grid>
     </Grid>
     <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '20px' }}>
