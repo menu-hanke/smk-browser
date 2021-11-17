@@ -10,19 +10,8 @@ const initialState = {
 
  saveProcess: {
   logData: [],
-  foundStandIds: ['idOfFoundStand'], // This is used for remove duplicates filtering process
-  foundIDs: [
-   {
-    propertyId: '',
-    geojsonFile: 'nameOfTheFile.json',
-    patches: [
-     {
-      patchId: 1,
-      standXMLFile: 'nameOfTheFile.xml'
-     }
-    ]
-   }
-  ]
+  foundStandIds: [] as string[], // This is used for remove duplicates filtering process
+  foundIDs: [] as any[]
  },
 
  map: {
@@ -38,7 +27,30 @@ const initialState = {
 const dataReducer = createReducer(initialState, {
  ADD_DATA_TO_STORE: (state, action) => {
   state.beforeFetch.propertyIds.push(action.payload.propertyId)
+ },
+ SAVE_FOUND_ID: (state, action) => {
+  if (state.saveProcess.foundIDs.find((object) => object.propertyId === action.payload.propertyId)) {
+   return
+  }
+  state.saveProcess.foundIDs.push({
+   propertyId: action.payload.propertyId,
+   geojsonFile: action.payload.geojsonFile
+  })
+ },
+ SAVE_FOUND_STAND_IDS: (state, action) => {
+  state.saveProcess.foundStandIds = [...state.saveProcess.foundStandIds.concat(action.payload.foundStandIds)]
  }
 })
 
 export default dataReducer
+
+// {
+//   propertyId: '',
+//   geojsonFile: 'nameOfTheFile.json',
+//   patches: [
+//    {
+//     patchwId: 1,
+//     standXMLFile: 'nameOfTheFile.xml'
+//    }
+//   ]
+//  }
