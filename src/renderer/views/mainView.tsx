@@ -19,7 +19,7 @@ import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
 
-import { setFoundId, setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData } from '../Store/Actions/data'
+import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
 
 const MainView: React.FC = () => {
@@ -91,6 +91,8 @@ const MainView: React.FC = () => {
  }
 
  const getData = async () => {
+  const foundIds = []
+
   dispatch(setLogData({ logData: [] }))
   const arrayOfIDs = propertyIDs
    .replace(/[\r\n\t]/g, '')
@@ -116,6 +118,9 @@ const MainView: React.FC = () => {
      filename: `mml-${ID}.json`,
      data: dataString
     })
+
+    foundIds.push({ propertyId: ID, geojsonFile: `mml-${ID}.json` })
+
     try {
      await Promise.all(
       data.features.map(async (geometry: any, index: number) => {
@@ -132,6 +137,8 @@ const MainView: React.FC = () => {
 
        // 1. Convert XML to JSON
        let jsonObject = await xml2js.parseStringPromise(dataAsText)
+
+       console.log('jsonObject before filtering: ', jsonObject)
 
        //_____ Function for reading prefix from XML file _____
        const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
@@ -183,18 +190,23 @@ const MainView: React.FC = () => {
        }
 
        // 3. Save ID:s of the stands that are to be saved to Redux
+
        const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
        dispatch(setFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
-       console.log('array of stand IDs: ', arrayOfStandIds)
+       //  console.log('array of stand IDs: ', arrayOfStandIds)
        // 4. Convert Json back to XML
        const builder = new xml2js.Builder()
        const filteredXml = builder.buildObject(jsonObject)
 
        // 5. Update save process state in Redux
-       dispatch(setFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
+       //  dispatch(setFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
-       // 6. write files to folder
+       // 6 Save patches under foundIds.patches[] in Redux
+       //  dispatch(setPatchForPropertyid({ propertyId: ID, patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` }))
+       //  foundIds.find((object) => object.propertyId === ID)
+
+       // 7. write files to folder
        if (filteredXml.includes('<Error><Message>errCode')) {
         const date = new Date()
         dispatch(
@@ -240,7 +252,10 @@ const MainView: React.FC = () => {
      enqueueSnackbar(`Error during download: ${error}`, {
       variant: 'error'
      })
-     console.log(error)
+     //  console.log(error)
+    } finally {
+     // Dispatch actions in here, after all downloads are completed to avoid re-renders
+     console.log()
     }
    })
   )
