@@ -25,7 +25,6 @@ const DropdownSelect: React.FC = () => {
  }
 
  const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
- console.log('found stand IDs: ', foundIDs)
 
  return (
   <Select
