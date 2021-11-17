@@ -56,11 +56,15 @@ const dataReducer = createReducer(initialState, {
  },
  SET_MODAL_STATE: (state, action) => {
   state.map.displayMap = action.payload.displayMap
+ },
+ SET_PATCH_FOR_PROPERTYID: (state, action) => {
+  state.saveProcess.foundIDs[action.payload.propertyID].patches.push({ patchId: action.payload.patchId, standXmlFile: action.payload.standXmlFile })
  }
 })
 
 export default dataReducer
 
+// const foundIds = [
 // {
 //   propertyId: '',
 //   geojsonFile: 'nameOfTheFile.json',
@@ -71,3 +75,4 @@ export default dataReducer
 //    }
 //   ]
 //  }
+// ]
