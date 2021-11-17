@@ -1,12 +1,10 @@
 import * as React from 'react'
 import { Select, MenuItem } from '@material-ui/core'
 import { SelectChangeEvent } from '@mui/material/Select'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
 
-interface Props {
- afterSelectFunction: () => void
-}
+import { setModalState } from '../Store/Actions/data'
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -19,7 +17,8 @@ const MenuProps = {
  }
 }
 
-const DropdownSelect: React.FC<Props> = ({ afterSelectFunction }) => {
+const DropdownSelect: React.FC = () => {
+ const dispatch = useDispatch()
  const [value, setValue] = React.useState('')
  const handleChange = (event: SelectChangeEvent) => {
   setValue(event.target.value as string)
@@ -34,7 +33,7 @@ const DropdownSelect: React.FC<Props> = ({ afterSelectFunction }) => {
    label="Age"
    onChange={(event) => {
     handleChange(event)
-    afterSelectFunction()
+    dispatch(setModalState({ displayMap: true }))
    }}
    MenuProps={MenuProps}
   >
