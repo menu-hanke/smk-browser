@@ -102,17 +102,16 @@ const MainView: React.FC = () => {
   await Promise.all(
    arrayOfIDs.map(async (ID: string) => {
     // _____ Clear old files from folder _____
-    const result = await ipcRenderer.invoke('removeOldFiles', {
+    await ipcRenderer.invoke('removeOldFiles', {
      propertyID: ID
     })
-    console.log('Old files removed!', result)
 
     // _____ Download Data ______
     const fetchURL =
      'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
-    console.log('Data from first API call: ', data)
+    // console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
     ipcRenderer.invoke('saveFile', {
@@ -120,15 +119,13 @@ const MainView: React.FC = () => {
      data: dataString
     })
 
-    foundIds.push({ propertyId: ID, geojsonFile: `mml-${ID}.json`, patches: [] })
-
-    console.log('data', data)
+    const context = { propertyId: ID, geojsonFile: `mml-${ID}.json`, stands: [] as any[] }
+    foundIds.push(context)
 
     try {
      await Promise.all(
       data.features.map(async (geometry: any, index: number) => {
-       const propertyID = data.features[index].properties.kiinteistotunnuksenEsitysmuoto
-       console.log('propertyID: ', propertyID)
+       //  const propertyID = data.features[index].properties.kiinteistotunnuksenEsitysmuoto
        const WKTPolygon = wkt.stringify(geometry) as string
        const fetchURL = 'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
        const response = await fetch(fetchURL, {
@@ -139,6 +136,34 @@ const MainView: React.FC = () => {
         body: `wktPolygon=${encodeURIComponent(WKTPolygon)}&stdVersion=${forestStandVersion}`
        })
        const dataAsText = await response.text()
+
+       if (dataAsText.includes('<Error><Message>errCode')) {
+        const date = new Date()
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'error',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  No stands found for property ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
+        ipcRenderer.invoke('saveFile', {
+         filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
+         data: emptyXML
+        })
+        return
+       } else if (dataAsText.includes('Palvelu ei ole käytettävissä')) {
+        const date = new Date()
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'error',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
+        return
+       }
 
        // 1. Convert XML to JSON
        let jsonObject = await xml2js.parseStringPromise(dataAsText)
@@ -203,74 +228,23 @@ const MainView: React.FC = () => {
        //  dispatch(setFoundIds({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
        // 6 Save patches under foundIds.patches[] in Redux
-       //  let foundObject = foundIds.find((object: any) => object.propertyId.replaceAll('-', '') === propertyID.replaceAll('0', ''))
-       //  console.log('Check if IDs are same and find method works: ', foundObject)
-
-       //  const checkEveryCharacter = (string1: string, string2: string) => {
-       //   const result = [] as boolean[]
-       //   const lenght = string1.length
-       //   for (var x = 0; x < lenght; x++) {
-       //    result.push(string2.includes(string1.charAt(x)))
-       //   }
-       //   if (result.every((value) => value === true)) {
-       //    console.log('checkEveryCharacter turns true!')
-       //    return true
-       //   } else {
-       //    console.log('checkEveryCharacter turns false :(')
-       //    return false
-       //   }
-       //  }
-
-       const setFoundIds = () => {
-        let foundIndex = foundIds.findIndex((object: any) => object.propertyId === propertyID)
-        // const foundIndex = foundIds.findIndex((object) => checkEveryCharacter(object.propertyID.replaceAll('-', ''), propertyID))
-        console.log('index of object: ', foundIndex)
-        foundIds[foundIndex].patches.push({ patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` })
-       }
-       setFoundIds()
-
-       console.log('foundIds after push: ', foundIds)
+       context.stands.push({ patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` })
+       console.log('context after push: ', context, 'ID: ', ID, 'context lenght: ', context.stands.length)
 
        // 7. write files to folder
-       if (filteredXml.includes('<Error><Message>errCode')) {
-        const date = new Date()
-        dispatch(
-         setLogData({
-          logData: {
-           type: 'error',
-           message: `${date.toLocaleTimeString(undefined, options as any)}:  No files found for property ID: ${ID} and patch: ${index}`
-          }
-         })
-        )
-        ipcRenderer.invoke('saveFile', {
-         filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
-         data: emptyXML
+       const date = new Date()
+       dispatch(
+        setLogData({
+         logData: {
+          type: 'success',
+          message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
+         }
         })
-       } else if (filteredXml.includes('Palvelu ei ole käytettävissä')) {
-        const date = new Date()
-        dispatch(
-         setLogData({
-          logData: {
-           type: 'error',
-           message: `${date.toLocaleTimeString(undefined, options as any)}:  Error during download, service not available for ID: ${ID} and patch: ${index}`
-          }
-         })
-        )
-       } else {
-        const date = new Date()
-        dispatch(
-         setLogData({
-          logData: {
-           type: 'success',
-           message: `${date.toLocaleTimeString(undefined, options as any)}:  Download completed for property ID: ${ID} and patch: ${index}`
-          }
-         })
-        )
-        ipcRenderer.invoke('saveFile', {
-         filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
-         data: filteredXml
-        })
-       }
+       )
+       ipcRenderer.invoke('saveFile', {
+        filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
+        data: filteredXml
+       })
       })
      )
     } catch (error) {
