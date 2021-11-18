@@ -30,14 +30,8 @@ const initialState = {
 }
 
 const dataReducer = createReducer(initialState, {
- SET_FOUND_ID: (state, action) => {
-  if (state.saveProcess.foundIDs.find((object) => object.propertyId === action.payload.propertyId)) {
-   return
-  }
-  state.saveProcess.foundIDs.push({
-   propertyId: action.payload.propertyId,
-   geojsonFile: action.payload.geojsonFile
-  })
+ SET_FOUND_IDS: (state, action) => {
+  state.saveProcess.foundIDs = action.payload.foundIds
  },
  SET_FOUND_STAND_IDS: (state, action) => {
   state.saveProcess.foundStandIds = state.saveProcess.foundStandIds.concat(action.payload.foundStandIds)
@@ -70,7 +64,7 @@ export default dataReducer
 //   geojsonFile: 'nameOfTheFile.json',
 //   patches: [
 //    {
-//     patchwId: 1,
+//     patchId: 1,
 //     standXMLFile: 'nameOfTheFile.xml'
 //    }
 //   ]
