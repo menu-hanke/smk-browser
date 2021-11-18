@@ -1,5 +1,5 @@
 export const ADD_DATA_TO_STORE = 'ADD_DATA_TO_STORE'
-export const SET_FOUND_ID = 'SET_FOUND_ID'
+export const SET_FOUND_IDS = 'SET_FOUND_IDS'
 export const SET_FOUND_STAND_IDS = 'SET_FOUND_STAND_IDS'
 export const SET_PROPERTY_IDS = 'SET_PROPERTY_IDS'
 export const SET_FOREST_STAND_VERSION = 'SET_FOREST_STAND_VERSION'
@@ -8,8 +8,8 @@ export const SET_LOG_DATA = 'SET_LOG_DATA'
 export const SET_MODAL_STATE = 'SET_MODAL_STATE'
 export const SET_PATCH_FOR_PROPERTYID = 'SET_PATCH_FOR_PROPERTYID'
 
-export const setFoundId = (data: any) => ({
- type: SET_FOUND_ID,
+export const setFoundIds = (data: any) => ({
+ type: SET_FOUND_IDS,
  payload: data
 })
 
