@@ -19,7 +19,7 @@ import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
 
-import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData } from '../Store/Actions/data'
+import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData, setFoundIds } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
 
 const MainView: React.FC = () => {
@@ -91,13 +91,14 @@ const MainView: React.FC = () => {
  }
 
  const getData = async () => {
-  const foundIds = []
-
+  const foundIds = [] as any[]
   dispatch(setLogData({ logData: [] }))
+
   const arrayOfIDs = propertyIDs
    .replace(/[\r\n\t]/g, '')
    .split(',')
    .filter((string: string) => string)
+
   await Promise.all(
    arrayOfIDs.map(async (ID: string) => {
     // _____ Clear old files from folder _____
@@ -111,7 +112,7 @@ const MainView: React.FC = () => {
      'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
-    // console.log('Data from first API call: ', data)
+    console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
     ipcRenderer.invoke('saveFile', {
@@ -119,11 +120,15 @@ const MainView: React.FC = () => {
      data: dataString
     })
 
-    foundIds.push({ propertyId: ID, geojsonFile: `mml-${ID}.json` })
+    foundIds.push({ propertyId: ID, geojsonFile: `mml-${ID}.json`, patches: [] })
+
+    console.log('data', data)
 
     try {
      await Promise.all(
       data.features.map(async (geometry: any, index: number) => {
+       const propertyID = data.features[index].properties.kiinteistotunnuksenEsitysmuoto
+       console.log('propertyID: ', propertyID)
        const WKTPolygon = wkt.stringify(geometry) as string
        const fetchURL = 'https://mtsrajapinnat.metsaan.fi/ATServices/ATXmlExportService/FRStandData/v1/ByPolygon'
        const response = await fetch(fetchURL, {
@@ -138,8 +143,6 @@ const MainView: React.FC = () => {
        // 1. Convert XML to JSON
        let jsonObject = await xml2js.parseStringPromise(dataAsText)
 
-       console.log('jsonObject before filtering: ', jsonObject)
-
        //_____ Function for reading prefix from XML file _____
        const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
         const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
@@ -153,7 +156,6 @@ const MainView: React.FC = () => {
        const xmlNsStand = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
        const xmlNsGeometricDataTypes = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes')
        const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
-       console.log(jsonObject)
 
        const removeStandsIfPointInPolygon = (jsonObject: any, geometry: any) => {
         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
@@ -185,7 +187,6 @@ const MainView: React.FC = () => {
         // 2.1 Filter out stands whose ID has already been saved
         jsonObject = produce(jsonObject, (draftState: any) => {
          draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(jsonObject, foundStandIds)
-         console.log('Json object after second filter: ', jsonObject)
         })
        }
 
@@ -194,17 +195,41 @@ const MainView: React.FC = () => {
        const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
        dispatch(setFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
-       //  console.log('array of stand IDs: ', arrayOfStandIds)
        // 4. Convert Json back to XML
        const builder = new xml2js.Builder()
        const filteredXml = builder.buildObject(jsonObject)
 
        // 5. Update save process state in Redux
-       //  dispatch(setFoundId({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
+       //  dispatch(setFoundIds({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
 
        // 6 Save patches under foundIds.patches[] in Redux
-       //  dispatch(setPatchForPropertyid({ propertyId: ID, patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` }))
-       //  foundIds.find((object) => object.propertyId === ID)
+       //  let foundObject = foundIds.find((object: any) => object.propertyId.replaceAll('-', '') === propertyID.replaceAll('0', ''))
+       //  console.log('Check if IDs are same and find method works: ', foundObject)
+
+       //  const checkEveryCharacter = (string1: string, string2: string) => {
+       //   const result = [] as boolean[]
+       //   const lenght = string1.length
+       //   for (var x = 0; x < lenght; x++) {
+       //    result.push(string2.includes(string1.charAt(x)))
+       //   }
+       //   if (result.every((value) => value === true)) {
+       //    console.log('checkEveryCharacter turns true!')
+       //    return true
+       //   } else {
+       //    console.log('checkEveryCharacter turns false :(')
+       //    return false
+       //   }
+       //  }
+
+       const setFoundIds = () => {
+        let foundIndex = foundIds.findIndex((object: any) => object.propertyId === propertyID)
+        // const foundIndex = foundIds.findIndex((object) => checkEveryCharacter(object.propertyID.replaceAll('-', ''), propertyID))
+        console.log('index of object: ', foundIndex)
+        foundIds[foundIndex].patches.push({ patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` })
+       }
+       setFoundIds()
+
+       console.log('foundIds after push: ', foundIds)
 
        // 7. write files to folder
        if (filteredXml.includes('<Error><Message>errCode')) {
@@ -252,10 +277,9 @@ const MainView: React.FC = () => {
      enqueueSnackbar(`Error during download: ${error}`, {
       variant: 'error'
      })
-     //  console.log(error)
     } finally {
      // Dispatch actions in here, after all downloads are completed to avoid re-renders
-     console.log()
+     dispatch(setFoundIds({ foundIds: foundIds }))
     }
    })
   )
