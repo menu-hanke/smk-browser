@@ -62,9 +62,9 @@ export default dataReducer
 // {
 //   propertyId: '',
 //   geojsonFile: 'nameOfTheFile.json',
-//   patches: [
+//   stands: [
 //    {
-//     patchId: 1,
+//     standId: 1,
 //     standXMLFile: 'nameOfTheFile.xml'
 //    }
 //   ]
