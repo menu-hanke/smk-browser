@@ -11,6 +11,7 @@ const ModalComponent: React.FC = () => {
  const classes = useStyles()
  const dispatch = useDispatch()
  const displayMap = useSelector((state: RootState) => state.map.displayMap)
+
  return (
   <Modal open={displayMap} onClose={() => dispatch(setModalState({ displayMap: false }))} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
    <Box className={classes.modalContainer}>
