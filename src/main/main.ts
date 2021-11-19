@@ -17,6 +17,8 @@ import fs from 'fs'
 import log from 'electron-log'
 import MenuBuilder from './menu'
 import { resolveHtmlPath } from './util'
+import { FoundID } from '../renderer/types'
+import { readFile } from 'fs/promises'
 
 let selectedPath: string[] | undefined
 
@@ -65,9 +67,7 @@ const createWindow = async () => {
   await installExtensions()
  }
 
- const RESOURCES_PATH = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets')
-  : path.join(__dirname, '../../assets')
+ const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(__dirname, '../../assets')
 
  const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths)
@@ -190,3 +190,57 @@ ipcMain.handle('copyToClipboard', async (_event, object) => {
  console.log(clipboard.readText('selection'))
  return { ok: true }
 })
+
+ipcMain.handle('readFilesFromDisc', async (_event, object: FoundID) => {
+ console.log('object stands', object.stands)
+
+ const dataToReturn = {
+  propertyId: object.propertyId,
+  geojsonFile: await readFile(`${selectedPath}/${object.geojsonFile}`, 'utf-8'),
+  stands: [] as any[]
+ }
+
+ // Returns raw data in buffer form --> needs to be passed to xml2js.parseStringPromise()
+ await Promise.all(
+  object.stands.map(async (stand: any) => {
+   const standFromFile = await readFile(`${selectedPath}/${stand.standXmlFile}`)
+   dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile })
+  })
+ )
+
+ console.log('Will return object: ', dataToReturn)
+ return dataToReturn
+ //   files.forEach((file: any) => {
+ //    const fileString = file.toString()
+ //    if (fileString.includes(object.geojsonFile)) {
+ //     dataToReturn.geojsonFile = JSON.stringify(file)
+ //    } else dataToReturn.geojsonFile = ''
+ //   })
+ //  })
+ //   files.forEach((file: any) => {
+ //    const fileString = file.toString()
+ //    console.log(fileString)
+ //    console.log('object propertyId in ipcRenderer function: ', object.propertyId)
+ //    if (object.stands.length > 0) {
+ //     object.stands.forEach((stand) => {
+ //      if (fileString.includes(stand.standXmlFile)) {
+ //       dataToReturn.stands.push({ standId: stand.standId, standXmlFile: file.toString() })
+ //      }
+ //     })
+ //    }
+ //   })
+ //   console.log('returning following object: ', dataToReturn)
+ //   return dataToReturn
+ //  })
+})
+
+// Example data return format
+
+// data: {
+//   propertyId: '1234',
+//   propertyJson: /* JSON FILE string */,
+//   stands: [{
+//     standId: '4321',
+//     standXML: /* XML FILE string */
+//   }]
+// }
