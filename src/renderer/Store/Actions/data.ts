@@ -6,7 +6,7 @@ export const SET_FOREST_STAND_VERSION = 'SET_FOREST_STAND_VERSION'
 export const SET_FOLDER_PATH = 'SET_FOLDER_PATH'
 export const SET_LOG_DATA = 'SET_LOG_DATA'
 export const SET_MODAL_STATE = 'SET_MODAL_STATE'
-export const SET_PATCH_FOR_PROPERTYID = 'SET_PATCH_FOR_PROPERTYID'
+export const SET_STAND_FOR_PROPERTYID = 'SET_STAND_FOR_PROPERTYID'
 
 export const setFoundIds = (data: any) => ({
  type: SET_FOUND_IDS,
@@ -43,7 +43,7 @@ export const setModalState = (data: any) => ({
  payload: data
 })
 
-export const setPatchForPropertyid = (data: any) => ({
- type: SET_PATCH_FOR_PROPERTYID,
+export const setStandForPropertyid = (data: any) => ({
+ type: SET_STAND_FOR_PROPERTYID,
  payload: data
 })
