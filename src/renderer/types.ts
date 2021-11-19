@@ -24,7 +24,7 @@ export interface FoundID {
 }
 
 interface Stand {
- standId: number
+ patchId: number
  standXmlFile: string
 }
 
@@ -36,6 +36,7 @@ interface Log {
 interface Map {
  displayMap: boolean
  useBackgroundMap: string
+ selectedPropertyId: string
  dataToDisplay: DataToDisplay
 }
 
