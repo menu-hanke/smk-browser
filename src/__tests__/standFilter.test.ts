@@ -23,6 +23,7 @@ describe('standFilter', () => {
     const result = filterStands(xml, data1Geometry, [], true);
 
     expect(result.arrayOfStandIds.length).toBe(29);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
   });
 
   it('all 50 stands should be in Finland', async () => {
@@ -34,6 +35,7 @@ describe('standFilter', () => {
     const result = filterStands(xml, finlandGeometry, [], true);
 
     expect(result.arrayOfStandIds.length).toBe(50);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
   });
 
   it('all 50 stands should be in Southern Finland', async () => {
@@ -45,6 +47,7 @@ describe('standFilter', () => {
     const result = filterStands(xml, southernFinlandGeometry, [], true);
 
     expect(result.arrayOfStandIds.length).toBe(50);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
   });
 
   it('no stands should be in Northern Finland', async () => {
@@ -56,5 +59,6 @@ describe('standFilter', () => {
     const result = filterStands(xml, northernFinlandGeometry, [], true);
 
     expect(result.arrayOfStandIds.length).toBe(0);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
   });
 });
