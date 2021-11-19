@@ -1,11 +1,7 @@
 import { createReducer } from '@reduxjs/toolkit'
+import { ReduxState } from 'renderer/types'
 
-interface Log {
- type: string
- message: string
-}
-
-const initialState = {
+const initialState: ReduxState = {
  beforeFetch: {
   propertyIds: '',
   forestStandVersion: 'MV1.8',
@@ -14,9 +10,9 @@ const initialState = {
  },
 
  saveProcess: {
-  logData: [] as Log[],
-  foundStandIds: [] as string[], // This is used for remove duplicates filtering process
-  foundIDs: [] as any[]
+  logData: [],
+  foundStandIds: [], // This is used for remove duplicates filtering process
+  foundIDs: []
  },
 
  map: {
@@ -24,7 +20,7 @@ const initialState = {
   useBackgroundMap: 'maastokartta',
   dataToDisplay: {
    standFeatures: {}, // Get XML from hard drive and convert it to geojson
-   parcelFeatures: {} // This is filled from json files fetched from the hard drive, once propertyID is selected in Map Screen
+   patchFeatures: {} // This is filled from json files fetched from the hard drive, once propertyID is selected in Map Screen
   }
  }
 }
@@ -51,8 +47,8 @@ const dataReducer = createReducer(initialState, {
  SET_MODAL_STATE: (state, action) => {
   state.map.displayMap = action.payload.displayMap
  },
- SET_PATCH_FOR_PROPERTYID: (state, action) => {
-  state.saveProcess.foundIDs[action.payload.propertyID].patches.push({ patchId: action.payload.patchId, standXmlFile: action.payload.standXmlFile })
+ SET_STAND_FOR_PROPERTYID: (state, action) => {
+  state.saveProcess.foundIDs[action.payload.propertyID].stands.push({ standId: action.payload.standId, standXmlFile: action.payload.standXmlFile })
  }
 })
 
