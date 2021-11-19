@@ -11,8 +11,6 @@ import { useSnackbar } from 'notistack'
 import wkt from 'wkt'
 import _ from 'lodash'
 import xml2js from 'xml2js'
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
-import { produce } from 'immer'
 import { ipcRenderer } from 'electron'
 
 import LogComponent from '../components/LogComponent'
@@ -21,6 +19,8 @@ import DropdownSelect from '../components/DropdownSelect'
 
 import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData, setFoundIds } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
+
+import { filterStands } from '../controllers/standFilter'
 
 const MainView: React.FC = () => {
  const dispatch = useDispatch()
@@ -111,6 +111,7 @@ const MainView: React.FC = () => {
      'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
+
     // console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
@@ -165,59 +166,14 @@ const MainView: React.FC = () => {
         return
        }
 
+
        // 1. Convert XML to JSON
        let jsonObject = await xml2js.parseStringPromise(dataAsText)
 
-       //_____ Function for reading prefix from XML file _____
-       const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
-        const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
-        const keyAsString = String(key)
-        if (keyAsString.indexOf('xmlns:') === 0) {
-         return keyAsString.slice(6)
-        } else return null
-       }
+       const filterResult = filterStands(jsonObject, geometry, foundStandIds, removeDuplicatesState);
+       jsonObject = filterResult.xml;
+       const arrayOfStandIds = filterResult.arrayOfStandIds;
 
-       // _____ Filtering functions _____
-       const xmlNsStand = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
-       const xmlNsGeometricDataTypes = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes')
-       const xmlNsGml = getNamespacePrefix(jsonObject['ForestPropertyData'], 'http://www.opengis.net/gml')
-
-       const removeStandsIfPointInPolygon = (jsonObject: any, geometry: any) => {
-        const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => {
-         const pointAsString =
-          stand[`${xmlNsStand}:StandBasicData`][0][`${xmlNsGeometricDataTypes}:PolygonGeometry`][0][`${xmlNsGml}:pointProperty`][0][`${xmlNsGml}:Point`][0][`${xmlNsGml}:coordinates`]
-         const point = pointAsString[0].split(',').map((value: string) => Number(value))
-         const result = booleanPointInPolygon(point, geometry)
-         return result
-        })
-        return filteredJsonObject
-       }
-
-       // ______ This function will remove duplicates from downloaded forest stands ______
-       const removeDuplicates = (jsonObject: any, arrayOfStandIds: string[]) => {
-        if (arrayOfStandIds.length === 0) {
-         return jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`]
-        } else {
-         const filteredJsonObject = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => !arrayOfStandIds.find((id) => id === stand['$'].id))
-         return filteredJsonObject
-        }
-       }
-
-       // 2. Filter out stand that are not inside the property
-       jsonObject = produce(jsonObject, (draftState: any) => {
-        draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeStandsIfPointInPolygon(jsonObject, geometry)
-       })
-
-       if (removeDuplicatesState === true) {
-        // 2.1 Filter out stands whose ID has already been saved
-        jsonObject = produce(jsonObject, (draftState: any) => {
-         draftState['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(jsonObject, foundStandIds)
-        })
-       }
-
-       // 3. Save ID:s of the stands that are to be saved to Redux
-
-       const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
        dispatch(setFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
        // 4. Convert Json back to XML

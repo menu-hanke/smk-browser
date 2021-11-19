@@ -30,6 +30,8 @@ https://github.com/menu-hanke/smk-browser/actions
 
 # Running project
 
+Use Node 16.x
+
 After cloning this repo, install dependencies
 
 `npm install`
@@ -40,14 +42,17 @@ To run project locally, run
 
 This will build the React application and launch it inside electron.
 
-# Notes regarding development
+# Running tests
 
-This project does not support hot reloading out of the box unfortunately.
-In order to view changes made to code, the application needs to be rebuilt and ran again using
+```
+npm run build:main
+npm run build:renderer
+npm run test
+```
 
-`npm run start`
+# Building locally 
 
-# Building locally
+!! OLD STUFF !!
 
 To build an executable file locally, following command can be used
 
