@@ -7,6 +7,7 @@ export const SET_FOLDER_PATH = 'SET_FOLDER_PATH'
 export const SET_LOG_DATA = 'SET_LOG_DATA'
 export const SET_MODAL_STATE = 'SET_MODAL_STATE'
 export const SET_STAND_FOR_PROPERTYID = 'SET_STAND_FOR_PROPERTYID'
+export const SET_SELECTED_PROPERTYID_FOR_MAP = 'SET_SELECTED_PROPERTYID_FOR_MAP'
 
 export const setFoundIds = (data: any) => ({
  type: SET_FOUND_IDS,
@@ -45,5 +46,10 @@ export const setModalState = (data: any) => ({
 
 export const setStandForPropertyid = (data: any) => ({
  type: SET_STAND_FOR_PROPERTYID,
+ payload: data
+})
+
+export const setSelectedPropertyIdForMap = (data: any) => ({
+ type: SET_SELECTED_PROPERTYID_FOR_MAP,
  payload: data
 })
