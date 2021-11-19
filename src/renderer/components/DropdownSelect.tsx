@@ -19,12 +19,14 @@ const MenuProps = {
 
 const DropdownSelect: React.FC = () => {
  const dispatch = useDispatch()
+ const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const [value, setValue] = React.useState('')
+
  const handleChange = (event: SelectChangeEvent) => {
   setValue(event.target.value as string)
  }
 
- const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
+ console.log('foundIDs in dropdownSelect: ', foundIDs)
 
  return (
   <Select
@@ -36,8 +38,8 @@ const DropdownSelect: React.FC = () => {
    }}
    MenuProps={MenuProps}
   >
-   {foundIDs.map((object) => (
-    <MenuItem value={object.propertyId}>{`propertyID: ${object.propertyId}`}</MenuItem>
+   {foundIDs.map((object: any) => (
+    <MenuItem key={object.propertyId} value={object.propertyId}>{`propertyID: ${object.propertyId}`}</MenuItem>
    ))}
   </Select>
  )
