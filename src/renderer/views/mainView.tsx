@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-ui/core'
-// import ipcRenderer from 'electron';
 import DownloadIcon from '@material-ui/icons/CloudDownload'
 import CopyIcon from '@material-ui/icons/FileCopy'
 import { useSnackbar } from 'notistack'
@@ -21,6 +20,7 @@ import DropdownSelect from '../components/DropdownSelect'
 
 import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData, setFoundIds } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
+import { FoundID } from 'renderer/types'
 
 const MainView: React.FC = () => {
  const dispatch = useDispatch()
@@ -91,7 +91,7 @@ const MainView: React.FC = () => {
  }
 
  const getData = async () => {
-  const foundIds = [] as any[]
+  let foundIds = [] as FoundID[]
   dispatch(setLogData({ logData: [] }))
 
   const arrayOfIDs = propertyIDs
@@ -216,7 +216,6 @@ const MainView: React.FC = () => {
        }
 
        // 3. Save ID:s of the stands that are to be saved to Redux
-
        const arrayOfStandIds = jsonObject['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].map((stand: any) => stand['$'].id)
        dispatch(setFoundStandIds({ foundStandIds: arrayOfStandIds }))
 
@@ -224,14 +223,11 @@ const MainView: React.FC = () => {
        const builder = new xml2js.Builder()
        const filteredXml = builder.buildObject(jsonObject)
 
-       // 5. Update save process state in Redux
-       //  dispatch(setFoundIds({ propertyId: ID, geojsonFile: `mml-${ID}.json` }))
-
-       // 6 Save patches under foundIds.patches[] in Redux
+       // 5 Save patches under foundIds.patches[] in Redux
        context.stands.push({ patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` })
        console.log('context after push: ', context, 'ID: ', ID, 'context lenght: ', context.stands.length)
 
-       // 7. write files to folder
+       // 6. Write files to folder
        const date = new Date()
        dispatch(
         setLogData({
@@ -251,12 +247,11 @@ const MainView: React.FC = () => {
      enqueueSnackbar(`Error during download: ${error}`, {
       variant: 'error'
      })
-    } finally {
-     // Dispatch actions in here, after all downloads are completed to avoid re-renders
-     dispatch(setFoundIds({ foundIds: foundIds }))
     }
    })
   )
+  // 7. Update saveProcess state to Redux
+  dispatch(setFoundIds({ foundIds: foundIds }))
  }
 
  const fetchDataAndAlert = async () => {
