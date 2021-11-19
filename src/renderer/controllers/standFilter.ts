@@ -1,6 +1,6 @@
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 
-export function filterStands(xml : any, parcelGeometry : any, foundStandIds : any[], removeDuplicatesState : boolean) {
+export function filterStands(xml : any, parcelGeometry : any, foundStandIds : any[], removeDuplicates : boolean) {
     //_____ Function for reading prefix from XML file _____
     const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
     const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
@@ -27,16 +27,16 @@ export function filterStands(xml : any, parcelGeometry : any, foundStandIds : an
     }
 
     // ______ This function will remove duplicates from downloaded forest stands ______
-    const removeDuplicates = (xml: any, arrayOfStandIds: string[]) => {
+    const removeDuplicateStands = (xml: any, arrayOfStandIds: string[]) => {
         return xml['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`].filter((stand: any) => !arrayOfStandIds.find((id) => id === stand['$'].id))
     }
 
     // 2. Filter out stand that are not inside the property
     xml['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeStandsIfPointInPolygon(xml, parcelGeometry)
 
-    if (removeDuplicatesState === true) {
+    if (removeDuplicates === true) {
         // 2.1 Filter out stands whose ID has already been saved
-        xml['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicates(xml, foundStandIds)
+        xml['ForestPropertyData'][`${xmlNsStand}:Stands`][0][`${xmlNsStand}:Stand`] = removeDuplicateStands(xml, foundStandIds)
     }
 
     // 3. Save ID:s of the stands that are to be saved to Redux

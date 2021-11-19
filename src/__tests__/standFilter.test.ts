@@ -61,4 +61,40 @@ describe('standFilter', () => {
     expect(result.arrayOfStandIds.length).toBe(0);
     expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
   });
+
+  it('previously processed stand should be filtered', async () => {
+    const xmlString = await readFile('src/__tests__/data1-stands.test.xml')
+    let xml = await xml2js.parseStringPromise(xmlString)
+
+    const idThatShouldBeFiltered    = '35569485'
+    const idThatShouldNotBeFiltered = '35569486'
+
+    expect(xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(50);
+
+    const result = filterStands(xml, finlandGeometry, [ idThatShouldBeFiltered ], true);
+
+    expect(result.arrayOfStandIds.length).toBe(49);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
+
+    expect(result.arrayOfStandIds.indexOf(idThatShouldBeFiltered) === -1).toBeTruthy()
+    expect(result.arrayOfStandIds.indexOf(idThatShouldNotBeFiltered) === -1).toBeFalsy()
+  });
+
+  it('previously processed stand should not be filtered if removeDuplicates is false', async () => {
+    const xmlString = await readFile('src/__tests__/data1-stands.test.xml')
+    let xml = await xml2js.parseStringPromise(xmlString)
+
+    const idThatWereSeenPreviously  = '35569485'
+    const idThatShouldNotBeFiltered = '35569486'
+
+    expect(xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(50);
+
+    const result = filterStands(xml, finlandGeometry, [ idThatWereSeenPreviously ], false);
+
+    expect(result.arrayOfStandIds.length).toBe(50);
+    expect(result.xml['ForestPropertyData']['st:Stands'][0]['st:Stand'].length).toBe(result.arrayOfStandIds.length);
+
+    expect(result.arrayOfStandIds.indexOf(idThatWereSeenPreviously) === -1).toBeFalsy()
+    expect(result.arrayOfStandIds.indexOf(idThatShouldNotBeFiltered) === -1).toBeFalsy()
+  });
 });
