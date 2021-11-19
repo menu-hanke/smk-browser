@@ -15,6 +15,9 @@ import proj4 from 'proj4'
 // import {fromLonLat} from 'ol/proj';
 import { register } from 'ol/proj/proj4'
 import { apiKey } from '../../../apiKey.json'
+import { useSelector } from 'react-redux'
+import { RootState } from 'renderer/App'
+import { ipcRenderer } from 'electron'
 
 const projection = new Projection({
  code: 'EPSG:3067',
@@ -26,6 +29,10 @@ register(proj4)
 
 const OpenLayersMap: React.FC = () => {
  const [map, setMap] = React.useState<any>()
+ const [dataToRender, setDataToRender] = React.useState('')
+ const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
+ const foundIds = useSelector((state: RootState) => state.saveProcess.foundIDs)
+
  const mapRef = React.useRef<HTMLElement>()
  const mapExtent = {
   center: [397915, 7132330],
@@ -34,7 +41,19 @@ const OpenLayersMap: React.FC = () => {
   projection: projection
  }
 
+ console.log('data from ipcRenderer: ', dataToRender)
+
  console.log(map)
+
+ // Find correct object from foundIds and pass it to ipcRenderer, to fetch the data from disc
+ React.useEffect(() => {
+  ;(async () => {
+   const dataById = foundIds.find((object) => object.propertyId === selectedPropertyId)
+   console.log('Will send object to ipcRenderer: ', dataById)
+   const response = await ipcRenderer.invoke('readFilesFromDisc', dataById)
+   setDataToRender(response)
+  })()
+ }, [selectedPropertyId])
 
  const initializeOL = React.useCallback(async () => {
   const parser = new WMTSCapabilities()
