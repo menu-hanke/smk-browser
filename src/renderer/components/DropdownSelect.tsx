@@ -3,7 +3,6 @@ import { Select, MenuItem } from '@material-ui/core'
 import { SelectChangeEvent } from '@mui/material/Select'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
-
 import { setModalState } from '../Store/Actions/data'
 
 const ITEM_HEIGHT = 48
@@ -21,12 +20,9 @@ const DropdownSelect: React.FC = () => {
  const dispatch = useDispatch()
  const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const [value, setValue] = React.useState('')
-
  const handleChange = (event: SelectChangeEvent) => {
   setValue(event.target.value as string)
  }
-
- console.log('foundIDs in dropdownSelect: ', foundIDs)
 
  return (
   <Select
