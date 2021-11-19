@@ -103,7 +103,8 @@ const MainView: React.FC = () => {
    arrayOfIDs.map(async (ID: string) => {
     // _____ Clear old files from folder _____
     await ipcRenderer.invoke('removeOldFiles', {
-     propertyID: ID
+     propertyID: ID,
+     selectedPath: folderPath
     })
 
     // _____ Download Data ______
@@ -115,8 +116,9 @@ const MainView: React.FC = () => {
     // console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
-    ipcRenderer.invoke('saveFile', {
+    await ipcRenderer.invoke('saveFile', {
      filename: `mml-${ID}.json`,
+     selectedPath: folderPath,
      data: dataString
     })
 
@@ -148,8 +150,9 @@ const MainView: React.FC = () => {
           }
          })
         )
-        ipcRenderer.invoke('saveFile', {
+        await ipcRenderer.invoke('saveFile', {
          filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
+         selectedPath: folderPath,
          data: emptyXML
         })
         return
@@ -199,6 +202,7 @@ const MainView: React.FC = () => {
        )
        ipcRenderer.invoke('saveFile', {
         filename: `mvk-${ID}_${index}_${forestStandVersion}.xml`,
+        selectedPath: folderPath,
         data: filteredXml
        })
       })
