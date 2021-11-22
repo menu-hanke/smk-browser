@@ -48,9 +48,9 @@ const dataReducer = createReducer(initialState, {
  SET_MODAL_STATE: (state, action) => {
   state.map.displayMap = action.payload.displayMap
  },
- SET_STAND_FOR_PROPERTYID: (state, action) => {
-  state.saveProcess.foundIDs[action.payload.propertyID].stands.push({ patchId: action.payload.patchId, standXmlFile: action.payload.standXmlFile })
- },
+ //  SET_STAND_FOR_PROPERTYID: (state, action) => {
+ //   state.saveProcess.foundIDs[action.payload.propertyID].stands.push({ patchId: action.payload.patchId, standXmlFile: action.payload.standXmlFile })
+ //  },
  SET_SELECTED_PROPERTYID_FOR_MAP: (state, action) => {
   state.map.selectedPropertyId = action.payload.selectedPropertyId
  }

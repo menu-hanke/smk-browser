@@ -44,10 +44,10 @@ export const setModalState = (data: any) => ({
  payload: data
 })
 
-export const setStandForPropertyid = (data: any) => ({
- type: SET_STAND_FOR_PROPERTYID,
- payload: data
-})
+// export const setStandForPropertyid = (data: any) => ({
+//  type: SET_STAND_FOR_PROPERTYID,
+//  payload: data
+// })
 
 export const setSelectedPropertyIdForMap = (data: any) => ({
  type: SET_SELECTED_PROPERTYID_FOR_MAP,
