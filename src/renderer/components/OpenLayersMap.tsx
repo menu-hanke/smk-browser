@@ -22,8 +22,11 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
 import 'ol/ol.css'
+import xml2js from 'xml2js'
+import { createPolygonFromXml } from 'renderer/controllers/createPolygonFromXml'
+import * as turf from '@turf/turf'
 
-import testData from '../testdata.json'
+// import testData from '../testdata.json'
 
 const projection = new Projection({
  code: 'EPSG:3067',
@@ -62,6 +65,7 @@ const OpenLayersMap: React.FC = () => {
   ;(async () => {
    const dataById = foundIds.find((object) => object.propertyId === selectedPropertyId)
    const response = await ipcRenderer.invoke('readFilesFromDisc', { dataById, folderPath })
+   console.log('dataToRender: ', dataToRender)
    setDataToRender(response)
   })()
  }, [selectedPropertyId])
@@ -101,14 +105,6 @@ const OpenLayersMap: React.FC = () => {
   return newMap
  }, [mapRef])
 
- // 1. add map to state
-
- // 3. push new layers into the object
-
- // 4. Add if (!map) return , failsafe
-
- // Remove old layers and add new ones
-
  // OnInit
  React.useEffect(() => {
   const initializeMapAsync = async () => {
@@ -134,14 +130,42 @@ const OpenLayersMap: React.FC = () => {
   }
 
   // Add new layers
-  const vectorSource = new VectorSource({
-   features: new GeoJSON().readFeatures(testData)
+
+  // 1. Convert Xml to Json
+
+  // loop stands
+  Promise.all(
+   (dataToRender.stands || []).map((stand: any) => {
+    return xml2js.parseStringPromise(stand.standXmlFile).then((xml) => {
+     const polygon = createPolygonFromXml(xml)
+     return polygon
+    })
+   })
+  ).then((polygons) => {
+   // You might need to turn this into feature collection  --> turf.featurecollection
+   console.log('polygons, :', polygons)
+
+   const parcelVectorSource = new VectorSource({
+    features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
+   })
+   const parcelVectorlayer = new VectorLayer({
+    source: parcelVectorSource
+   })
+
+   const standVectorSource = new VectorSource({
+    features: new GeoJSON().readFeatures(turf.featureCollection(polygons))
+   })
+   const standVectorlayer = new VectorLayer({
+    source: standVectorSource
+   })
+
+   map.getLayers().extend([parcelVectorlayer, standVectorlayer])
+   const extent = parcelVectorlayer.getSource().getExtent()
+   console.log('extent of the new layer: ', extent, 'vectorLayer: ', parcelVectorlayer.getSource())
+   if (!extent) return
+   map.getView().fit(extent)
   })
-  const vectorlayer = new VectorLayer({
-   source: vectorSource
-  })
-  map.getLayers().extend(vectorlayer)
- }, [dataToRender])
+ }, [map, dataToRender])
 
  // OnUnmount
  // React.useEffect(() => {
