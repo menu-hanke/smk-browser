@@ -161,7 +161,6 @@ ipcMain.handle('openFileSystem', async (_event, window) => {
  const selectedPath: string[] | undefined = dialog.showOpenDialogSync(window, {
   properties: ['openDirectory']
  })
- console.log('Got the path: ', selectedPath)
  return selectedPath && selectedPath[0]
 })
 
