@@ -18,6 +18,12 @@ import { apiKey } from '../../../apiKey.json'
 import { useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
 import { ipcRenderer } from 'electron'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import GeoJSON from 'ol/format/GeoJSON'
+import 'ol/ol.css'
+
+import testData from '../testdata.json'
 
 const projection = new Projection({
  code: 'EPSG:3067',
@@ -27,9 +33,15 @@ const projection = new Projection({
 proj4.defs('EPSG:3067', '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs')
 register(proj4)
 
+interface DataToRender {
+ propertyId: string
+ geojsonFile: string
+ stands: [{ patchId: number; standXmlFile: [number] }]
+}
+
 const OpenLayersMap: React.FC = () => {
- const [map, setMap] = React.useState<any>()
- const [dataToRender, setDataToRender] = React.useState('')
+ const [map, setMap] = React.useState<any>(null)
+ const [dataToRender, setDataToRender] = React.useState({} as DataToRender)
  const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
  const foundIds = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const folderPath = useSelector((state: RootState) => state.beforeFetch.folderPath)
@@ -43,14 +55,12 @@ const OpenLayersMap: React.FC = () => {
  }
 
  console.log('data from ipcRenderer: ', dataToRender)
-
- console.log(map)
+ console.log('map in OL map component: ', map)
 
  // Find correct object from foundIds and pass it to ipcRenderer, to fetch the data from disc
  React.useEffect(() => {
   ;(async () => {
    const dataById = foundIds.find((object) => object.propertyId === selectedPropertyId)
-   console.log('Will send object to ipcRenderer: ', dataById)
    const response = await ipcRenderer.invoke('readFilesFromDisc', { dataById, folderPath })
    setDataToRender(response)
   })()
@@ -91,10 +101,47 @@ const OpenLayersMap: React.FC = () => {
   return newMap
  }, [mapRef])
 
+ // 1. add map to state
+
+ // 3. push new layers into the object
+
+ // 4. Add if (!map) return , failsafe
+
+ // Remove old layers and add new ones
+
  // OnInit
  React.useEffect(() => {
-  setMap(initializeOL())
- }, [initializeOL])
+  const initializeMapAsync = async () => {
+   const initializedMap = await initializeOL()
+   setMap(initializedMap)
+  }
+  initializeMapAsync()
+ }, [])
+
+ React.useEffect(() => {
+  if (!map) {
+   console.log('map not initialized, will return')
+   return
+  }
+
+  console.log('Map initialized! :', map)
+
+  // Remove old layers
+  const layers = [] as any[]
+  map.getLayers().forEach((layer: any) => layers.push(layer))
+  while (layers.length > 1) {
+   layers.pop()
+  }
+
+  // Add new layers
+  const vectorSource = new VectorSource({
+   features: new GeoJSON().readFeatures(testData)
+  })
+  const vectorlayer = new VectorLayer({
+   source: vectorSource
+  })
+  map.getLayers().extend(vectorlayer)
+ }, [dataToRender])
 
  // OnUnmount
  // React.useEffect(() => {
