@@ -32,6 +32,7 @@ const OpenLayersMap: React.FC = () => {
  const [dataToRender, setDataToRender] = React.useState('')
  const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
  const foundIds = useSelector((state: RootState) => state.saveProcess.foundIDs)
+ const folderPath = useSelector((state: RootState) => state.beforeFetch.folderPath)
 
  const mapRef = React.useRef<HTMLElement>()
  const mapExtent = {
@@ -50,7 +51,7 @@ const OpenLayersMap: React.FC = () => {
   ;(async () => {
    const dataById = foundIds.find((object) => object.propertyId === selectedPropertyId)
    console.log('Will send object to ipcRenderer: ', dataById)
-   const response = await ipcRenderer.invoke('readFilesFromDisc', dataById)
+   const response = await ipcRenderer.invoke('readFilesFromDisc', { dataById, folderPath })
    setDataToRender(response)
   })()
  }, [selectedPropertyId])
