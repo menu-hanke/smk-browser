@@ -201,31 +201,8 @@ ipcMain.handle('readFilesFromDisc', async (_event, { dataById, folderPath }: { d
    dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile })
   })
  )
-
  console.log('Will return object: ', dataToReturn)
  return dataToReturn
- //   files.forEach((file: any) => {
- //    const fileString = file.toString()
- //    if (fileString.includes(object.geojsonFile)) {
- //     dataToReturn.geojsonFile = JSON.stringify(file)
- //    } else dataToReturn.geojsonFile = ''
- //   })
- //  })
- //   files.forEach((file: any) => {
- //    const fileString = file.toString()
- //    console.log(fileString)
- //    console.log('object propertyId in ipcRenderer function: ', object.propertyId)
- //    if (object.stands.length > 0) {
- //     object.stands.forEach((stand) => {
- //      if (fileString.includes(stand.standXmlFile)) {
- //       dataToReturn.stands.push({ standId: stand.standId, standXmlFile: file.toString() })
- //      }
- //     })
- //    }
- //   })
- //   console.log('returning following object: ', dataToReturn)
- //   return dataToReturn
- //  })
 })
 
 // Example data return format
