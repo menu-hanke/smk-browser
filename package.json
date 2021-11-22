@@ -252,6 +252,7 @@
     "@mui/styles": "^5.1.0",
     "@reduxjs/toolkit": "^1.6.2",
     "@turf/boolean-point-in-polygon": "^6.5.0",
+    "@turf/turf": "^6.5.0",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.1",
     "electron-redux-devtools": "^0.3.4",
