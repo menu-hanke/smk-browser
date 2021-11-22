@@ -13,14 +13,12 @@ import 'regenerator-runtime/runtime'
 import path from 'path'
 import { app, BrowserWindow, shell, ipcMain, dialog, clipboard } from 'electron'
 import { autoUpdater } from 'electron-updater'
-import fs from 'fs'
+import { writeFile, unlink, readdir } from 'fs/promises'
 import log from 'electron-log'
 import MenuBuilder from './menu'
 import { resolveHtmlPath } from './util'
 import { FoundID } from '../renderer/types'
 import { readFile } from 'fs/promises'
-
-let selectedPath: string[] | undefined
 
 export default class AppUpdater {
  constructor() {
@@ -154,35 +152,33 @@ app
  .catch(console.log)
 
 ipcMain.handle('saveFile', async (_event, obj) => {
- console.log('Saving file: ', obj.filename)
- fs.writeFile(`${selectedPath}/${obj.filename}`, obj.data, () => {
-  console.log('wrote file')
- })
- const result = { ok: true }
- console.log('returning', result)
- return result
+ console.log('Saving file: ', obj.selectedPath, '/', obj.filename)
+
+ await writeFile(`${obj.selectedPath}/${obj.filename}`, obj.data)
+ return { ok: true }
 })
 
 ipcMain.handle('openFileSystem', async (_event, window) => {
- selectedPath = dialog.showOpenDialogSync(window, {
+ const selectedPath : string[] | undefined = dialog.showOpenDialogSync(window, {
   properties: ['openDirectory']
  })
  console.log('Got the path: ', selectedPath)
- return selectedPath
+ return selectedPath && selectedPath[0]
 })
 
 ipcMain.handle('removeOldFiles', async (_event, object) => {
- fs.readdir(`${selectedPath}`, (_err: any, files: any) => {
-  files.forEach((file: any) => {
-   const fileString = file.toString()
-   if (fileString.includes(object.propertyID)) {
-    console.log('Removing file: ', file)
-    fs.unlink(`${selectedPath}/${file}`, () => {})
-   }
-  })
- })
- const results = { ok: true }
- return results
+  const files = await readdir(object.selectedPath);
+  await Promise.all(files.map((file : any) => {
+    const fileString = file.toString()
+    if (fileString.includes(object.propertyID)) {
+      console.log(`Removing file: ${object.selectedPath}/${fileString}`)
+      return unlink(`${object.selectedPath}/${fileString}`)
+    } else {
+      return Promise.resolve()
+    }
+  }))
+  return { ok: true }
+
 })
 
 ipcMain.handle('copyToClipboard', async (_event, object) => {
