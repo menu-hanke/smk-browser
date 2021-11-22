@@ -13,12 +13,11 @@ import 'regenerator-runtime/runtime'
 import path from 'path'
 import { app, BrowserWindow, shell, ipcMain, dialog, clipboard } from 'electron'
 import { autoUpdater } from 'electron-updater'
-import { writeFile, unlink, readdir } from 'fs/promises'
+import { writeFile, unlink, readdir, readFile } from 'fs/promises'
 import log from 'electron-log'
 import MenuBuilder from './menu'
 import { resolveHtmlPath } from './util'
 import { FoundID } from '../renderer/types'
-import { readFile } from 'fs/promises'
 
 export default class AppUpdater {
  constructor() {
@@ -159,7 +158,7 @@ ipcMain.handle('saveFile', async (_event, obj) => {
 })
 
 ipcMain.handle('openFileSystem', async (_event, window) => {
- const selectedPath : string[] | undefined = dialog.showOpenDialogSync(window, {
+ const selectedPath: string[] | undefined = dialog.showOpenDialogSync(window, {
   properties: ['openDirectory']
  })
  console.log('Got the path: ', selectedPath)
@@ -167,18 +166,19 @@ ipcMain.handle('openFileSystem', async (_event, window) => {
 })
 
 ipcMain.handle('removeOldFiles', async (_event, object) => {
-  const files = await readdir(object.selectedPath);
-  await Promise.all(files.map((file : any) => {
-    const fileString = file.toString()
-    if (fileString.includes(object.propertyID)) {
-      console.log(`Removing file: ${object.selectedPath}/${fileString}`)
-      return unlink(`${object.selectedPath}/${fileString}`)
-    } else {
-      return Promise.resolve()
-    }
-  }))
-  return { ok: true }
-
+ const files = await readdir(object.selectedPath)
+ await Promise.all(
+  files.map((file: any) => {
+   const fileString = file.toString()
+   if (fileString.includes(object.propertyID)) {
+    console.log(`Removing file: ${object.selectedPath}/${fileString}`)
+    return unlink(`${object.selectedPath}/${fileString}`)
+   } else {
+    return Promise.resolve()
+   }
+  })
+ )
+ return { ok: true }
 })
 
 ipcMain.handle('copyToClipboard', async (_event, object) => {
@@ -187,19 +187,17 @@ ipcMain.handle('copyToClipboard', async (_event, object) => {
  return { ok: true }
 })
 
-ipcMain.handle('readFilesFromDisc', async (_event, object: FoundID) => {
- console.log('object stands', object.stands)
-
+ipcMain.handle('readFilesFromDisc', async (_event, { dataById, folderPath }: { dataById: FoundID; folderPath: string }) => {
  const dataToReturn = {
-  propertyId: object.propertyId,
-  geojsonFile: await readFile(`${selectedPath}/${object.geojsonFile}`, 'utf-8'),
+  propertyId: dataById.propertyId,
+  geojsonFile: await readFile(`${folderPath}/${dataById.geojsonFile}`, 'utf-8'),
   stands: [] as any[]
  }
 
  // Returns raw data in buffer form --> needs to be passed to xml2js.parseStringPromise()
  await Promise.all(
-  object.stands.map(async (stand: any) => {
-   const standFromFile = await readFile(`${selectedPath}/${stand.standXmlFile}`)
+  dataById.stands.map(async (stand: any) => {
+   const standFromFile = await readFile(`${folderPath}/${stand.standXmlFile}`)
    dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile })
   })
  )
