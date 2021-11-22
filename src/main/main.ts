@@ -189,7 +189,7 @@ ipcMain.handle('copyToClipboard', async (_event, object) => {
 ipcMain.handle('readFilesFromDisc', async (_event, { dataById, folderPath }: { dataById: FoundID; folderPath: string }) => {
  const dataToReturn = {
   propertyId: dataById.propertyId,
-  geojsonFile: await readFile(`${folderPath}/${dataById.geojsonFile}`, 'utf-8'),
+  geojsonFile: (await readFile(`${folderPath}/${dataById.geojsonFile}`, 'utf-8')).toString(),
   stands: [] as any[]
  }
 
@@ -197,7 +197,8 @@ ipcMain.handle('readFilesFromDisc', async (_event, { dataById, folderPath }: { d
  await Promise.all(
   dataById.stands.map(async (stand: any) => {
    const standFromFile = await readFile(`${folderPath}/${stand.standXmlFile}`)
-   dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile })
+   console.log('xml on node: ', standFromFile.toString())
+   dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile.toString() })
   })
  )
  console.log('Will return object: ', dataToReturn)
