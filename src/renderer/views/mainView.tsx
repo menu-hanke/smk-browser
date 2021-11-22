@@ -184,7 +184,6 @@ const MainView: React.FC = () => {
 
        // 5 Save patches under foundIds.patches[] in Redux
        context.stands.push({ patchId: index, standXmlFile: `mvk-${ID}_${index}_${forestStandVersion}.xml` })
-       console.log('context after push: ', context, 'ID: ', ID, 'context lenght: ', context.stands.length)
 
        // 6. Write files to folder
        const date = new Date()
