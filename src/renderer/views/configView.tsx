@@ -3,19 +3,22 @@
 import * as React from 'react'
 import { Grid, TextField } from '@material-ui/core'
 import { setApiKeyToRedux } from 'renderer/Store/Actions/data'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from 'renderer/App'
 
 const ConfigView: React.FC = () => {
+ const dispatch = useDispatch()
+
  React.useEffect(() => {
   dispatch(setApiKeyToRedux({ apiKey: localStorage.getItem('smk-browser.config.apiKey') }))
  }, [])
 
- const dispatch = useDispatch()
- const [apiKey, setApiKey] = React.useState(localStorage.getItem('smk-browser.config.apiKey'))
+ //  const [apiKey, setApiKey] = React.useState(localStorage.getItem('smk-browser.config.apiKey'))
+ const apiKey = useSelector((state: RootState) => state.apiKey)
 
  const apiKeyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   localStorage.setItem('smk-browser.config.apiKey', event.target.value.trim())
-  setApiKey(event.target.value)
+  // setApiKey(event.target.value)
   dispatch(setApiKeyToRedux({ apiKey: event.target.value }))
  }
 
