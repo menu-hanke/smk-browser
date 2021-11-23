@@ -22,6 +22,8 @@ import { FoundID } from 'renderer/types'
 
 import { filterStands } from '../controllers/standFilter'
 
+import ConfigView from './configView'
+
 const MainView: React.FC = () => {
  const dispatch = useDispatch()
  const { enqueueSnackbar } = useSnackbar()
@@ -314,6 +316,7 @@ const MainView: React.FC = () => {
      <LogComponent logData={logData} />
     </Grid>
    </Grid>
+   <ConfigView />
    <ModalComponent />
   </div>
  )

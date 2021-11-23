@@ -12,7 +12,6 @@ import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS'
 import WMTSCapabilities from 'ol/format/WMTSCapabilities'
 import proj4 from 'proj4'
 import { register } from 'ol/proj/proj4'
-import { apiKey } from '../../../apiKey.json'
 import { useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
 import { ipcRenderer } from 'electron'
@@ -23,6 +22,10 @@ import xml2js from 'xml2js'
 import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
 import { Style, Stroke, Fill } from 'ol/style'
+
+const apiKey = () => localStorage.getItem('smk-browser.config.apiKey')
+
+// import testData from '../testdata.json'
 
 const projection = new Projection({
  code: 'EPSG:3067',
@@ -69,7 +72,7 @@ const OpenLayersMap: React.FC = () => {
  const initializeOL = React.useCallback(async () => {
   const parser = new WMTSCapabilities()
   const url = 'https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml?api-key='
-  const response = await fetch(url + apiKey)
+  const response = await fetch(url + apiKey())
   const text = await response.text()
   const result = await parser.read(text)
 
@@ -80,7 +83,7 @@ const OpenLayersMap: React.FC = () => {
 
   if (options && options.urls) {
    const urlToEdit = options.urls[0]
-   options.urls[0] = `${urlToEdit}api-key=${apiKey}`
+   options.urls[0] = `${urlToEdit}api-key=${apiKey()}`
   }
 
   const newMap = new ol.Map({
