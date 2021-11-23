@@ -2,6 +2,8 @@ import { createReducer } from '@reduxjs/toolkit'
 import { ReduxState } from 'renderer/types'
 
 const initialState: ReduxState = {
+ apiKey: '',
+
  beforeFetch: {
   propertyIds: '',
   forestStandVersion: 'MV1.8',
@@ -53,6 +55,9 @@ const dataReducer = createReducer(initialState, {
  //  },
  SET_SELECTED_PROPERTYID_FOR_MAP: (state, action) => {
   state.map.selectedPropertyId = action.payload.selectedPropertyId
+ },
+ SET_API_KEY_TO_REDUX: (state, action) => {
+  state.apiKey = action.payload.apiKey
  }
 })
 
