@@ -105,7 +105,7 @@ const createWindow = async () => {
   mainWindow?.webContents.once('devtools-opened', () => {
    mainWindow?.focus()
   })
-  mainWindow?.webContents.openDevTools()
+  // mainWindow?.webContents.openDevTools()
  })
 
  mainWindow.on('closed', () => {
