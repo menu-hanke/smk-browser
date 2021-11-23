@@ -23,6 +23,8 @@ import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXm
 import * as turf from '@turf/turf'
 import { Style, Stroke, Fill } from 'ol/style'
 
+import ChangeMap from './ChangeMap'
+
 const apiKey = () => localStorage.getItem('smk-browser.config.apiKey')
 
 // import testData from '../testdata.json'
@@ -48,6 +50,8 @@ const OpenLayersMap: React.FC = () => {
  const foundIds = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const folderPath = useSelector((state: RootState) => state.beforeFetch.folderPath)
 
+ const useBackgroundMap = useSelector((state: RootState) => state.map.useBackgroundMap)
+
  const mapRef = React.useRef<HTMLElement>()
  const mapExtent = {
   center: [397915, 7132330],
@@ -56,15 +60,11 @@ const OpenLayersMap: React.FC = () => {
   projection: projection
  }
 
- console.log('data from ipcRenderer: ', dataToRender)
- console.log('map in OL map component: ', map)
-
  // Find correct object from foundIds and pass it to ipcRenderer, to fetch the data from disc
  React.useEffect(() => {
   ;(async () => {
    const dataById = foundIds.find((object) => object.propertyId === selectedPropertyId)
    const response = await ipcRenderer.invoke('readFilesFromDisc', { dataById, folderPath })
-   console.log('dataToRender: ', dataToRender)
    setDataToRender(response)
   })()
  }, [selectedPropertyId])
@@ -77,7 +77,7 @@ const OpenLayersMap: React.FC = () => {
   const result = await parser.read(text)
 
   let options = optionsFromCapabilities(result, {
-   layer: 'maastokartta', // tai 'ortokuva'
+   layer: useBackgroundMap, // tai 'ortokuva'
    projection: projection
   })
 
@@ -114,37 +114,71 @@ const OpenLayersMap: React.FC = () => {
  }, [])
 
  React.useEffect(() => {
-  const createPolygonsAndDisplay = async () => {
-   if (!map) return
+  if (!map) return
+  const changeBackgroundMap = async () => {
+   const parser = new WMTSCapabilities()
+   const url = 'https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml?api-key='
+   const response = await fetch(url + apiKey())
+   const text = await response.text()
+   const result = await parser.read(text)
 
+   let options = optionsFromCapabilities(result, {
+    layer: useBackgroundMap, // tai 'ortokuva'
+    projection: projection
+   })
+
+   if (options && options.urls) {
+    const urlToEdit = options.urls[0]
+    options.urls[0] = `${urlToEdit}api-key=${apiKey()}`
+   }
+
+   const newBackground = new TileLayer({
+    source: new WMTS(options as any),
+    opacity: 1
+   })
+
+   map.getLayers().setAt(0, newBackground)
+  }
+  changeBackgroundMap()
+ }, [useBackgroundMap])
+
+ React.useEffect(() => {
+  if (!map) return
+
+  // Remove old layers
+
+  console.log('map layers before remove', map.getLayers())
+  // while (map.getLayers().length > 1) {
+  //  // map.getLayers().removeAt(1)
+  //  const l = map.getLayers()[1]
+  //  map.removeLayer(l)
+  //  l.dispose()
+  // }
+
+  console.log('map layers after remove', map.getLayers())
+
+  const createPolygonsAndDisplay = async () => {
    const parcelVectorLayerStyle = new Style({
     stroke: new Stroke({
      color: 'red',
-     lineDash: [4],
+     //  lineDash: [4],
      width: 6
     }),
     fill: new Fill({
-     color: 'rgba(0, 0, 255, 0.3)'
+     color: 'rgba(0, 0, 255, 0.2)'
     })
    })
 
    const standVectorLayerStyle = new Style({
     stroke: new Stroke({
      color: '#FEC627',
-     lineDash: [4],
+     //  lineDash: [4],
      width: 3
     }),
     fill: new Fill({
      color: 'rgba(0, 0, 255, 0.1)'
     })
    })
-
-   // Remove old layers
-   const layers = [] as any[]
-   map.getLayers().forEach((layer: any) => layers.push(layer))
-   while (layers.length > 1) {
-    layers.pop()
-   }
 
    // Add new layers
    const polygons = await Promise.all(
@@ -155,6 +189,8 @@ const OpenLayersMap: React.FC = () => {
     })
    )
 
+   const polygonArray = polygons.flat()
+
    // New Layers to display on map
    const parcelVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
@@ -164,30 +200,46 @@ const OpenLayersMap: React.FC = () => {
     style: parcelVectorLayerStyle
    })
    const standVectorSource = new VectorSource({
-    features: new GeoJSON().readFeatures(turf.featureCollection(polygons.flat()))
+    features: new GeoJSON().readFeatures(turf.featureCollection(polygonArray))
    })
    const standVectorlayer = new VectorLayer({
     source: standVectorSource,
     style: standVectorLayerStyle
    })
 
-   map.getLayers().extend([parcelVectorlayer, standVectorlayer])
+   map.getLayers().setAt(1, parcelVectorlayer)
+   map.getLayers().setAt(2, standVectorlayer)
+   console.log('all layers after extend: ', map.getLayers())
+   console.log('parcels', JSON.parse(dataToRender.geojsonFile))
    const extent = parcelVectorlayer.getSource().getExtent()
    if (!extent) return
+   console.log('extent: ', extent)
    map.getView().fit(extent)
   }
   createPolygonsAndDisplay()
  }, [map, dataToRender])
 
  // OnUnmount
- // React.useEffect(() => {
- //   return () => {
- //     // clear everything when component unmounts
- //   }
- // }, [])
+ React.useEffect(() => {
+  return () => {
+   const oldLayers = map?.getLayers() || []
+   oldLayers.forEach((l: any) => {
+    l.getSource().clear()
+    l.setSource(undefined)
+    map?.removeLayer(l)
+   })
+   map?.setTarget(null)
+  }
+ }, [])
 
  const classes = useStyles()
- return <div ref={mapRef as any} className={classes.mapContainer} />
+ return (
+  <div ref={mapRef as any} className={classes.mapContainer}>
+   <div className={classes.changeMapContainer}>
+    <ChangeMap />
+   </div>
+  </div>
+ )
 }
 
 const useStyles = makeStyles(() =>
@@ -196,6 +248,12 @@ const useStyles = makeStyles(() =>
    height: '450px',
    width: '980px',
    background: 'black'
+  },
+  changeMapContainer: {
+   position: 'fixed',
+   zIndex: 10,
+   bottom: 25,
+   left: 25
   }
  })
 )
