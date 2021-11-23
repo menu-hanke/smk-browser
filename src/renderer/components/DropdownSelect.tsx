@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Select, MenuItem } from '@material-ui/core'
-import { SelectChangeEvent } from '@mui/material/Select'
+
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
 import { setModalState, setSelectedPropertyIdForMap } from '../Store/Actions/data'
@@ -19,17 +19,13 @@ const MenuProps = {
 const DropdownSelect: React.FC = () => {
  const dispatch = useDispatch()
  const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
- const [selectedPropertyId, setSelectedPropertyId] = React.useState('')
- const handleChange = (event: SelectChangeEvent) => {
-  setSelectedPropertyId(event.target.value as string)
- }
+ const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
 
  return (
   <Select
    value={selectedPropertyId}
-   label="Age"
    onChange={(event) => {
-    handleChange(event)
+    // handleChange(event)
     dispatch(setModalState({ displayMap: true }))
     dispatch(setSelectedPropertyIdForMap({ selectedPropertyId: event.target.value }))
    }}
