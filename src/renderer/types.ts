@@ -38,6 +38,8 @@ interface Map {
  displayMap: boolean
  useBackgroundMap: string
  selectedPropertyId: string
+ currentPolygonIndices: number[]
+ selectedStandIndex: number
  dataToDisplay: DataToDisplay
 }
 
