@@ -9,6 +9,9 @@ export const SET_MODAL_STATE = 'SET_MODAL_STATE'
 export const SET_STAND_FOR_PROPERTYID = 'SET_STAND_FOR_PROPERTYID'
 export const SET_SELECTED_PROPERTYID_FOR_MAP = 'SET_SELECTED_PROPERTYID_FOR_MAP'
 export const SET_API_KEY_TO_REDUX = 'SET_API_KEY_TO_REDUX'
+export const SET_STAND_INDEX_FOR_MAP = 'SET_STAND_INDEX_FOR_MAP'
+export const SET_CURRENT_POLYGON_INDICES = 'SET_CURRENT_POLYGON_INDICES'
+export const SET_BACKGROUND_MAP = 'SET_BACKGROUND_MAP'
 
 export const setFoundIds = (data: any) => ({
  type: SET_FOUND_IDS,
@@ -55,7 +58,22 @@ export const setSelectedPropertyIdForMap = (data: any) => ({
  payload: data
 })
 
+export const setCurrentPolygonIndices = (data: any) => ({
+ type: SET_CURRENT_POLYGON_INDICES,
+ payload: data
+})
+
+export const setStandIndexForMap = (data: any) => ({
+ type: SET_STAND_INDEX_FOR_MAP,
+ payload: data
+})
+
 export const setApiKeyToRedux = (data: any) => ({
  type: SET_API_KEY_TO_REDUX,
+ payload: data
+})
+
+export const setBackgroundMap = (data: any) => ({
+ type: SET_BACKGROUND_MAP,
  payload: data
 })

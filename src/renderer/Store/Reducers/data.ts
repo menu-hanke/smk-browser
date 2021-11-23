@@ -21,6 +21,8 @@ const initialState: ReduxState = {
   displayMap: false,
   useBackgroundMap: 'maastokartta',
   selectedPropertyId: '',
+  currentPolygonIndices: [],
+  selectedStandIndex: 0,
   dataToDisplay: {
    standFeatures: {}, // Get XML from hard drive and convert it to geojson
    patchFeatures: {} // This is filled from json files fetched from the hard drive, once propertyID is selected in Map Screen
@@ -56,8 +58,17 @@ const dataReducer = createReducer(initialState, {
  SET_SELECTED_PROPERTYID_FOR_MAP: (state, action) => {
   state.map.selectedPropertyId = action.payload.selectedPropertyId
  },
+ SET_CURRENT_POLYGON_INDICES: (state, action) => {
+  state.map.currentPolygonIndices = action.payload.currentPolygonIndices
+ },
+ SET_STAND_INDEX_FOR_MAP: (state, action) => {
+  state.map.selectedStandIndex = action.payload.selectedStandIndex
+ },
  SET_API_KEY_TO_REDUX: (state, action) => {
   state.apiKey = action.payload.apiKey
+ },
+ SET_BACKGROUND_MAP: (state, action) => {
+  state.map.useBackgroundMap = action.payload.useBackgroundMap
  }
 })
 
