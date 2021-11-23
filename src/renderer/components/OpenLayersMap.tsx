@@ -25,6 +25,9 @@ import 'ol/ol.css'
 import xml2js from 'xml2js'
 import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
+import Style from 'ol/style/Style'
+import Stroke from 'ol/style/Stroke'
+import Fill from 'ol/style/Fill'
 
 // import testData from '../testdata.json'
 
@@ -116,6 +119,28 @@ const OpenLayersMap: React.FC = () => {
 
  React.useEffect(() => {
   const createPolygonsAndDisplay = async () => {
+   const parcelVectorLayerStyle = new Style({
+    stroke: new Stroke({
+     color: 'red',
+     lineDash: [4],
+     width: 6
+    }),
+    fill: new Fill({
+     color: 'rgba(0, 0, 255, 0.3)'
+    })
+   })
+
+   const standVectorLayerStyle = new Style({
+    stroke: new Stroke({
+     color: '#FEC627',
+     lineDash: [4],
+     width: 3
+    }),
+    fill: new Fill({
+     color: 'rgba(0, 0, 255, 0.1)'
+    })
+   })
+
    if (!map) return
 
    // Remove old layers
@@ -139,14 +164,16 @@ const OpenLayersMap: React.FC = () => {
     features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
    })
    const parcelVectorlayer = new VectorLayer({
-    source: parcelVectorSource
+    source: parcelVectorSource,
+    style: parcelVectorLayerStyle
    })
 
    const standVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(turf.featureCollection(polygons.flat()))
    })
    const standVectorlayer = new VectorLayer({
-    source: standVectorSource
+    source: standVectorSource,
+    style: standVectorLayerStyle
    })
 
    map.getLayers().extend([parcelVectorlayer, standVectorlayer])
