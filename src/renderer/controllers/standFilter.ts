@@ -1,14 +1,7 @@
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
+import { getNamespacePrefix } from './getNamespacePrefix'
 
 export function filterStands(xml : any, parcelGeometry : any, foundStandIds : any[], removeDuplicates : boolean) {
-    //_____ Function for reading prefix from XML file _____
-    const getNamespacePrefix = (rootElement: any, nameSpace: any) => {
-    const key = Object.keys(rootElement['$']).find((key) => rootElement['$'][key] === nameSpace)
-    const keyAsString = String(key)
-    if (keyAsString.indexOf('xmlns:') === 0) {
-        return keyAsString.slice(6)
-    } else return null
-    }
 
     // _____ Filtering functions _____
     const xmlNsStand = getNamespacePrefix(xml['ForestPropertyData'], 'http://standardit.tapio.fi/schemas/forestData/Stand')
