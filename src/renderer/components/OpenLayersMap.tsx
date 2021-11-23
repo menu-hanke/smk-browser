@@ -11,8 +11,6 @@ import TileLayer from 'ol/layer/Tile'
 import WMTS, { optionsFromCapabilities } from 'ol/source/WMTS'
 import WMTSCapabilities from 'ol/format/WMTSCapabilities'
 import proj4 from 'proj4'
-// import {ScaleLine, defaults as defaultControls} from 'ol/control';
-// import {fromLonLat} from 'ol/proj';
 import { register } from 'ol/proj/proj4'
 import { apiKey } from '../../../apiKey.json'
 import { useSelector } from 'react-redux'
@@ -21,15 +19,10 @@ import { ipcRenderer } from 'electron'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
-import 'ol/ol.css'
 import xml2js from 'xml2js'
 import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
-import Style from 'ol/style/Style'
-import Stroke from 'ol/style/Stroke'
-import Fill from 'ol/style/Fill'
-
-// import testData from '../testdata.json'
+import { Style, Stroke, Fill } from 'ol/style'
 
 const projection = new Projection({
  code: 'EPSG:3067',
@@ -119,6 +112,8 @@ const OpenLayersMap: React.FC = () => {
 
  React.useEffect(() => {
   const createPolygonsAndDisplay = async () => {
+   if (!map) return
+
    const parcelVectorLayerStyle = new Style({
     stroke: new Stroke({
      color: 'red',
@@ -141,8 +136,6 @@ const OpenLayersMap: React.FC = () => {
     })
    })
 
-   if (!map) return
-
    // Remove old layers
    const layers = [] as any[]
    map.getLayers().forEach((layer: any) => layers.push(layer))
@@ -159,7 +152,7 @@ const OpenLayersMap: React.FC = () => {
     })
    )
 
-   console.log('polygons, :', polygons)
+   // New Layers to display on map
    const parcelVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
    })
@@ -167,7 +160,6 @@ const OpenLayersMap: React.FC = () => {
     source: parcelVectorSource,
     style: parcelVectorLayerStyle
    })
-
    const standVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(turf.featureCollection(polygons.flat()))
    })
@@ -178,7 +170,6 @@ const OpenLayersMap: React.FC = () => {
 
    map.getLayers().extend([parcelVectorlayer, standVectorlayer])
    const extent = parcelVectorlayer.getSource().getExtent()
-   console.log('extent of the new layer: ', extent, 'vectorLayer: ', parcelVectorlayer.getSource())
    if (!extent) return
    map.getView().fit(extent)
   }
