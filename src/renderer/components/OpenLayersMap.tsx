@@ -23,7 +23,7 @@ import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
 import 'ol/ol.css'
 import xml2js from 'xml2js'
-import { createPolygonFromXml } from 'renderer/controllers/createPolygonFromXml'
+import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
 
 // import testData from '../testdata.json'
@@ -137,7 +137,7 @@ const OpenLayersMap: React.FC = () => {
   Promise.all(
    (dataToRender.stands || []).map((stand: any) => {
     return xml2js.parseStringPromise(stand.standXmlFile).then((xml) => {
-     const polygon = createPolygonFromXml(xml)
+     const polygon = createPolygonsFromXml(xml)
      return polygon
     })
    })
