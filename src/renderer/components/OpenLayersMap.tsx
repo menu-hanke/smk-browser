@@ -14,7 +14,6 @@ import proj4 from 'proj4'
 // import {ScaleLine, defaults as defaultControls} from 'ol/control';
 // import {fromLonLat} from 'ol/proj';
 import { register } from 'ol/proj/proj4'
-import { apiKey } from '../../../apiKey.json'
 import { useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
 import { ipcRenderer } from 'electron'
@@ -23,8 +22,10 @@ import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
 import 'ol/ol.css'
 import xml2js from 'xml2js'
-import { createPolygonFromXml } from 'renderer/controllers/createPolygonFromXml'
+import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
+
+const apiKey = () => localStorage.getItem('smk-browser.config.apiKey');
 
 // import testData from '../testdata.json'
 
@@ -73,7 +74,7 @@ const OpenLayersMap: React.FC = () => {
  const initializeOL = React.useCallback(async () => {
   const parser = new WMTSCapabilities()
   const url = 'https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml?api-key='
-  const response = await fetch(url + apiKey)
+  const response = await fetch(url + apiKey())
   const text = await response.text()
   const result = await parser.read(text)
 
@@ -84,7 +85,7 @@ const OpenLayersMap: React.FC = () => {
 
   if (options && options.urls) {
    const urlToEdit = options.urls[0]
-   options.urls[0] = `${urlToEdit}api-key=${apiKey}`
+   options.urls[0] = `${urlToEdit}api-key=${apiKey()}`
   }
 
   const newMap = new ol.Map({
@@ -137,13 +138,15 @@ const OpenLayersMap: React.FC = () => {
   Promise.all(
    (dataToRender.stands || []).map((stand: any) => {
     return xml2js.parseStringPromise(stand.standXmlFile).then((xml) => {
-     const polygon = createPolygonFromXml(xml)
+     const polygon = createPolygonsFromXml(xml)
      return polygon
     })
    })
   ).then((polygons) => {
    // You might need to turn this into feature collection  --> turf.featurecollection
+   polygons = polygons.reduce((memo, a) => memo.concat(a), [])
    console.log('polygons, :', polygons)
+   
 
    const parcelVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
