@@ -115,36 +115,26 @@ const OpenLayersMap: React.FC = () => {
  }, [])
 
  React.useEffect(() => {
-  if (!map) {
-   console.log('map not initialized, will return')
-   return
-  }
+  const createPolygonsAndDisplay = async () => {
+   if (!map) return
 
-  console.log('Map initialized! :', map)
+   // Remove old layers
+   const layers = [] as any[]
+   map.getLayers().forEach((layer: any) => layers.push(layer))
+   while (layers.length > 1) {
+    layers.pop()
+   }
 
-  // Remove old layers
-  const layers = [] as any[]
-  map.getLayers().forEach((layer: any) => layers.push(layer))
-  while (layers.length > 1) {
-   layers.pop()
-  }
-
-  // Add new layers
-
-  // 1. Convert Xml to Json
-
-  // loop stands
-  Promise.all(
-   (dataToRender.stands || []).map((stand: any) => {
-    return xml2js.parseStringPromise(stand.standXmlFile).then((xml) => {
+   // Add new layers
+   const polygons = await Promise.all(
+    (dataToRender.stands || []).map(async (stand: any) => {
+     const xml = await xml2js.parseStringPromise(stand.standXmlFile)
      const polygon = createPolygonsFromXml(xml)
      return polygon
     })
-   })
-  ).then((polygons) => {
-   // You might need to turn this into feature collection  --> turf.featurecollection
-   console.log('polygons, :', polygons)
+   )
 
+   console.log('polygons, :', polygons)
    const parcelVectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(JSON.parse(dataToRender.geojsonFile))
    })
@@ -153,7 +143,7 @@ const OpenLayersMap: React.FC = () => {
    })
 
    const standVectorSource = new VectorSource({
-    features: new GeoJSON().readFeatures(turf.featureCollection(polygons))
+    features: new GeoJSON().readFeatures(turf.featureCollection(polygons.flat()))
    })
    const standVectorlayer = new VectorLayer({
     source: standVectorSource
@@ -164,7 +154,8 @@ const OpenLayersMap: React.FC = () => {
    console.log('extent of the new layer: ', extent, 'vectorLayer: ', parcelVectorlayer.getSource())
    if (!extent) return
    map.getView().fit(extent)
-  })
+  }
+  createPolygonsAndDisplay()
  }, [map, dataToRender])
 
  // OnUnmount
