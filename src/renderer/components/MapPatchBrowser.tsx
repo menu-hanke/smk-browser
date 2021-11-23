@@ -6,19 +6,18 @@ import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
 import DropdownSelect from './DropdownSelect'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
-import { setSelectedPropertyIdForMap } from 'renderer/Store/Actions/data'
-
-// interface interfaceName {
-//   value: string
-// }
+import { setSelectedPropertyIdForMap, setStandIndexForMap } from 'renderer/Store/Actions/data'
 
 const MapPatchBrowser: React.FC = () => {
  const dispatch = useDispatch()
  const classes = useStyles()
  const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
- console.log('selected propertyId in mapPatchBrowser: ', selectedPropertyId)
  const currentIndex = foundIDs.findIndex((object) => object.propertyId === selectedPropertyId)
+
+ // Stands
+ const currentPolygonIndices = useSelector((state: RootState) => state.map.currentPolygonIndices)
+ const standIndexForMap = useSelector((state: RootState) => state.map.selectedStandIndex)
 
  const upKeyPressed = () => {
   const foundObject = foundIDs[currentIndex - 1]
@@ -34,6 +33,20 @@ const MapPatchBrowser: React.FC = () => {
   }
  }
 
+ const leftKeyPressed = () => {
+  const selectedStandIndex = standIndexForMap - 1
+  if (selectedStandIndex !== -1 || selectedStandIndex < currentPolygonIndices.length) {
+   dispatch(setStandIndexForMap({ selectedStandIndex: selectedStandIndex }))
+  }
+ }
+
+ const rightKeyPressed = () => {
+  const selectedStandIndex = standIndexForMap + 1
+  if (selectedStandIndex !== -1 || selectedStandIndex < currentPolygonIndices.length) {
+   dispatch(setStandIndexForMap({ selectedStandIndex: selectedStandIndex }))
+  }
+ }
+
  const keyDownHandler = (event: any) => {
   switch (event.keyCode) {
    case 27:
@@ -41,7 +54,8 @@ const MapPatchBrowser: React.FC = () => {
     return
 
    case 37:
-    alert('left key')
+    // left key
+    leftKeyPressed()
     return
 
    case 38:
@@ -49,7 +63,8 @@ const MapPatchBrowser: React.FC = () => {
     return
 
    case 39:
-    alert('right key')
+    // Right key
+    rightKeyPressed()
     return
 
    case 40:
