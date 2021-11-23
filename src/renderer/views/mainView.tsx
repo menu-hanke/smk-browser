@@ -35,6 +35,7 @@ const MainView: React.FC = () => {
  const logData = useSelector((state: RootState) => state.saveProcess.logData)
  const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
  const removeDuplicatesState = useSelector((state: RootState) => state.beforeFetch.removeDuplicates)
+ const apiKey = useSelector((state: RootState) => state.apiKey)
 
  const options = {
   weekday: 'short',
@@ -222,6 +223,10 @@ const MainView: React.FC = () => {
   }
   if (folderPath === '' || folderPath === undefined) {
    enqueueSnackbar('Please select folder path', { variant: 'error' })
+   return
+  }
+  if (apiKey === '' || apiKey === null) {
+   enqueueSnackbar('Please add apiKey', { variant: 'error' })
    return
   }
   await getData()
