@@ -5,7 +5,7 @@ import xml2js from 'xml2js'
 import wkt from 'wkt'
 import { createPolygonsFromXml } from '../renderer/controllers/createPolygonsFromXml'
 
-describe('createPolygonFromXml', () => {
+describe('createPolygonsFromXml', () => {
   it('should load multiple stands (both eterior-only and stands with single interiors)', async () => {
     const xmlString = await readFile('src/__tests__/data1-stands.test.xml')
     let xml = await xml2js.parseStringPromise(xmlString)
