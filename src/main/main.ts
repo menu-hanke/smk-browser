@@ -151,8 +151,6 @@ app
  .catch(console.log)
 
 ipcMain.handle('saveFile', async (_event, obj) => {
- console.log('Saving file: ', obj.selectedPath, '/', obj.filename)
-
  await writeFile(`${obj.selectedPath}/${obj.filename}`, obj.data)
  return { ok: true }
 })
@@ -170,7 +168,6 @@ ipcMain.handle('removeOldFiles', async (_event, object) => {
   files.map((file: any) => {
    const fileString = file.toString()
    if (fileString.includes(object.propertyID)) {
-    console.log(`Removing file: ${object.selectedPath}/${fileString}`)
     return unlink(`${object.selectedPath}/${fileString}`)
    } else {
     return Promise.resolve()
@@ -182,7 +179,6 @@ ipcMain.handle('removeOldFiles', async (_event, object) => {
 
 ipcMain.handle('copyToClipboard', async (_event, object) => {
  clipboard.writeText(object.logData)
- console.log(clipboard.readText('selection'))
  return { ok: true }
 })
 
@@ -197,11 +193,9 @@ ipcMain.handle('readFilesFromDisc', async (_event, { dataById, folderPath }: { d
  await Promise.all(
   dataById.stands.map(async (stand: any) => {
    const standFromFile = await readFile(`${folderPath}/${stand.standXmlFile}`)
-   console.log('xml on node: ', standFromFile.toString())
    dataToReturn.stands.push({ patchId: stand.patchId, standXmlFile: standFromFile.toString() })
   })
  )
- console.log('Will return object: ', dataToReturn)
  return dataToReturn
 })
 
