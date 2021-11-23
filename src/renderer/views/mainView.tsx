@@ -116,6 +116,17 @@ const MainView: React.FC = () => {
     const response = await fetch(fetchURL + ID)
     const data = await response.json()
 
+    if (data.features.length === 0) {
+     dispatch(
+      setLogData({
+       logData: {
+        type: 'error',
+        message: `${new Date().toLocaleTimeString(undefined, options as any)}:  No data for parcel ID: ${ID} `
+       }
+      })
+     )
+     return
+    }
     // console.log('Data from first API call: ', data)
     const dataString = JSON.stringify(data)
     // eslint-disable-next-line promise/catch-or-return
@@ -143,13 +154,13 @@ const MainView: React.FC = () => {
        })
        const dataAsText = await response.text()
 
-       if (dataAsText.includes('<Error><Message>errCode')) {
+       if (dataAsText.includes('<Error>')) {
         const date = new Date()
         dispatch(
          setLogData({
           logData: {
            type: 'error',
-           message: `${date.toLocaleTimeString(undefined, options as any)}:  No stands found for property ID: ${ID} and patch: ${index}`
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  No stands found for property ID: ${ID} and patch: ${index}, error: ${dataAsText}`
           }
          })
         )
@@ -170,6 +181,16 @@ const MainView: React.FC = () => {
          })
         )
         return
+       } else if (dataAsText.includes('Kyselyalue on liian suuri')) {
+        const date = new Date()
+        dispatch(
+         setLogData({
+          logData: {
+           type: 'error',
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  Kyselyalue liian suurifor  ID: ${ID} and patch: ${index}`
+          }
+         })
+        )
        }
 
        // 1. Convert XML to JSON
@@ -206,6 +227,14 @@ const MainView: React.FC = () => {
       })
      )
     } catch (error) {
+     dispatch(
+      setLogData({
+       logData: {
+        type: 'error',
+        message: `${new Date().toLocaleTimeString(undefined, options as any)}:  Download FAILED for property ID: ${ID}`
+       }
+      })
+     )
      enqueueSnackbar(`Error during download: ${error}`, {
       variant: 'error'
      })
