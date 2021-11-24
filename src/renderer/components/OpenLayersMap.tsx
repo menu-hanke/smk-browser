@@ -23,8 +23,6 @@ import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXm
 import * as turf from '@turf/turf'
 import { Style, Stroke, Fill } from 'ol/style'
 
-import ChangeMap from './ChangeMap'
-
 const apiKey = () => localStorage.getItem('smk-browser.config.apiKey')
 
 // import testData from '../testdata.json'
@@ -233,13 +231,7 @@ const OpenLayersMap: React.FC = () => {
  }, [])
 
  const classes = useStyles()
- return (
-  <div ref={mapRef as any} className={classes.mapContainer}>
-   <div className={classes.changeMapContainer}>
-    <ChangeMap />
-   </div>
-  </div>
- )
+ return <div ref={mapRef as any} className={classes.mapContainer}></div>
 }
 
 const useStyles = makeStyles(() =>
@@ -248,12 +240,6 @@ const useStyles = makeStyles(() =>
    height: '450px',
    width: '980px',
    background: 'black'
-  },
-  changeMapContainer: {
-   position: 'fixed',
-   zIndex: 10,
-   bottom: 25,
-   left: 25
   }
  })
 )
