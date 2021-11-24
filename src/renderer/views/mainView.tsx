@@ -11,17 +11,13 @@ import wkt from 'wkt'
 import _ from 'lodash'
 import xml2js from 'xml2js'
 import { ipcRenderer } from 'electron'
-
 import LogComponent from '../components/LogComponent'
 import ModalComponent from '../components/ModalComponent'
 import DropdownSelect from '../components/DropdownSelect'
-
-import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData, setFoundIds } from '../Store/Actions/data'
+import { setFoundStandIds, setPropertyIds, setForestStandVersion, setFolderPath, setLogData, setFoundIds, resetLogData } from '../Store/Actions/data'
 import { RootState } from 'renderer/App'
 import { FoundID } from 'renderer/types'
-
 import { filterStands } from '../controllers/standFilter'
-
 import ConfigView from './configView'
 
 const MainView: React.FC = () => {
@@ -121,7 +117,7 @@ const MainView: React.FC = () => {
       setLogData({
        logData: {
         type: 'error',
-        message: `${new Date().toLocaleTimeString(undefined, options as any)}:  No data for parcel ID: ${ID} `
+        message: `${new Date().toLocaleTimeString(undefined, options as any)}:  No parcel data found for property ID: ${ID}`
        }
       })
      )
@@ -155,12 +151,13 @@ const MainView: React.FC = () => {
        const dataAsText = await response.text()
 
        if (dataAsText.includes('<Error>')) {
+        console.log('error code: ', dataAsText)
         const date = new Date()
         dispatch(
          setLogData({
           logData: {
            type: 'error',
-           message: `${date.toLocaleTimeString(undefined, options as any)}:  No stands found for property ID: ${ID} and patch: ${index}, error: ${dataAsText}`
+           message: `${date.toLocaleTimeString(undefined, options as any)}:  No stands found for property ID: ${ID} and patch: ${index}, error: ${dataAsText.split('=')[2].split(/,|\./)[0]}`
           }
          })
         )
@@ -235,9 +232,6 @@ const MainView: React.FC = () => {
        }
       })
      )
-     enqueueSnackbar(`Error during download: ${error}`, {
-      variant: 'error'
-     })
     }
    })
   )
@@ -258,6 +252,7 @@ const MainView: React.FC = () => {
    enqueueSnackbar('Please add apiKey', { variant: 'error' })
    return
   }
+  dispatch(resetLogData({ logData: [] }))
   await getData()
   const date = new Date()
   dispatch(
@@ -343,10 +338,12 @@ const MainView: React.FC = () => {
      </Grid>
 
      <Grid item xs={12}>
-      <DropdownSelect />
+      <div style={{ width: containerWidth, height: '50px' }}>
+       <DropdownSelect />
+      </div>
      </Grid>
     </Grid>
-    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '20px' }}>
+    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '30px' }}>
      <LogComponent logData={logData} />
     </Grid>
    </Grid>
