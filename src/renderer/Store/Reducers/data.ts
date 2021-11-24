@@ -22,11 +22,7 @@ const initialState: ReduxState = {
   useBackgroundMap: 'maastokartta',
   selectedPropertyId: '',
   currentPolygonIndices: [],
-  selectedStandIndex: 0,
-  dataToDisplay: {
-   standFeatures: {}, // Get XML from hard drive and convert it to geojson
-   patchFeatures: {} // This is filled from json files fetched from the hard drive, once propertyID is selected in Map Screen
-  }
+  selectedStandIndex: 0
  }
 }
 
@@ -49,12 +45,12 @@ const dataReducer = createReducer(initialState, {
  SET_LOG_DATA: (state, action) => {
   state.saveProcess.logData = [...state.saveProcess.logData, action.payload.logData]
  },
- SET_MODAL_STATE: (state, action) => {
+ RESET_LOG_DATA: (state, action) => {
+  state.saveProcess.logData = action.payload.logData
+ },
+ SET_DISPLAY_MAP: (state, action) => {
   state.map.displayMap = action.payload.displayMap
  },
- //  SET_STAND_FOR_PROPERTYID: (state, action) => {
- //   state.saveProcess.foundIDs[action.payload.propertyID].stands.push({ patchId: action.payload.patchId, standXmlFile: action.payload.standXmlFile })
- //  },
  SET_SELECTED_PROPERTYID_FOR_MAP: (state, action) => {
   state.map.selectedPropertyId = action.payload.selectedPropertyId
  },
@@ -73,16 +69,3 @@ const dataReducer = createReducer(initialState, {
 })
 
 export default dataReducer
-
-// const foundIds = [
-// {
-//   propertyId: '',
-//   geojsonFile: 'nameOfTheFile.json',
-//   stands: [
-//    {
-//     patchId: 1,
-//     standXMLFile: 'nameOfTheFile.xml'
-//    }
-//   ]
-//  }
-// ]

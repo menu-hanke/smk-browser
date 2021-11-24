@@ -4,8 +4,9 @@ export const SET_FOUND_STAND_IDS = 'SET_FOUND_STAND_IDS'
 export const SET_PROPERTY_IDS = 'SET_PROPERTY_IDS'
 export const SET_FOREST_STAND_VERSION = 'SET_FOREST_STAND_VERSION'
 export const SET_FOLDER_PATH = 'SET_FOLDER_PATH'
+export const RESET_LOG_DATA = 'RESET_LOG_DATA'
 export const SET_LOG_DATA = 'SET_LOG_DATA'
-export const SET_MODAL_STATE = 'SET_MODAL_STATE'
+export const SET_DISPLAY_MAP = 'SET_DISPLAY_MAP'
 export const SET_STAND_FOR_PROPERTYID = 'SET_STAND_FOR_PROPERTYID'
 export const SET_SELECTED_PROPERTYID_FOR_MAP = 'SET_SELECTED_PROPERTYID_FOR_MAP'
 export const SET_API_KEY_TO_REDUX = 'SET_API_KEY_TO_REDUX'
@@ -43,15 +44,15 @@ export const setLogData = (data: any) => ({
  payload: data
 })
 
-export const setModalState = (data: any) => ({
- type: SET_MODAL_STATE,
+export const resetLogData = (data: any) => ({
+ type: RESET_LOG_DATA,
  payload: data
 })
 
-// export const setStandForPropertyid = (data: any) => ({
-//  type: SET_STAND_FOR_PROPERTYID,
-//  payload: data
-// })
+export const setDisplayMap = (data: any) => ({
+ type: SET_DISPLAY_MAP,
+ payload: data
+})
 
 export const setSelectedPropertyIdForMap = (data: any) => ({
  type: SET_SELECTED_PROPERTYID_FOR_MAP,
