@@ -1,75 +1,50 @@
 import * as React from 'react'
-import { createStyles, makeStyles } from '@mui/styles'
+
 import { Grid } from '@material-ui/core'
 import IconButton from '@mui/material/IconButton'
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material'
 import DropdownSelect from './DropdownSelect'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
-import { setSelectedPropertyIdForMap, setStandIndexForMap } from 'renderer/Store/Actions/data'
+import { setDisplayMap, setSelectedPropertyIdForMap } from 'renderer/Store/Actions/data'
 
 const MapPatchBrowser: React.FC = () => {
  const dispatch = useDispatch()
- const classes = useStyles()
+
  const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
  const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
  const currentIndex = foundIDs.findIndex((object) => object.propertyId === selectedPropertyId)
 
- // Stands
- const currentPolygonIndices = useSelector((state: RootState) => state.map.currentPolygonIndices)
- const standIndexForMap = useSelector((state: RootState) => state.map.selectedStandIndex)
-
- const upKeyPressed = () => {
+ const leftKeyPressed = () => {
   const foundObject = foundIDs[currentIndex - 1]
   if (foundObject) {
    dispatch(setSelectedPropertyIdForMap({ selectedPropertyId: foundObject.propertyId }))
   }
  }
 
- const downKeyPressed = () => {
+ const rightKeyPressed = () => {
   const foundObject = foundIDs[currentIndex + 1]
   if (foundObject) {
    dispatch(setSelectedPropertyIdForMap({ selectedPropertyId: foundObject.propertyId }))
   }
  }
 
- const leftKeyPressed = () => {
-  const selectedStandIndex = standIndexForMap - 1
-  if (selectedStandIndex !== -1 || selectedStandIndex < currentPolygonIndices.length) {
-   dispatch(setStandIndexForMap({ selectedStandIndex: selectedStandIndex }))
-  }
- }
-
- const rightKeyPressed = () => {
-  const selectedStandIndex = standIndexForMap + 1
-  if (selectedStandIndex !== -1 || selectedStandIndex < currentPolygonIndices.length) {
-   dispatch(setStandIndexForMap({ selectedStandIndex: selectedStandIndex }))
-  }
+ const escKeyPressed = () => {
+  dispatch(setDisplayMap({ displayMap: false }))
  }
 
  const keyDownHandler = (event: any) => {
   switch (event.keyCode) {
    case 27:
-    alert('esc key')
+    escKeyPressed()
     return
 
    case 37:
-    // left key
     leftKeyPressed()
     return
 
-   case 38:
-    upKeyPressed()
-    return
-
    case 39:
-    // Right key
     rightKeyPressed()
-    return
-
-   case 40:
-    // Down Key
-    downKeyPressed()
     return
 
    default:
@@ -85,30 +60,32 @@ const MapPatchBrowser: React.FC = () => {
  })
 
  return (
-  <Grid container className={classes.container} alignItems="center" justifyContent="space-around">
-   <Grid container item xs={2} justifyContent="center" alignItems="center">
-    <IconButton size="large">
+  <Grid container alignItems="center" justifyContent="space-around">
+   <Grid container item xs={3} justifyContent="center" alignItems="center">
+    <IconButton
+     size="large"
+     onClick={() => {
+      leftKeyPressed()
+     }}
+    >
      <KeyboardArrowLeft fontSize="large" />
     </IconButton>
    </Grid>
-   <Grid container item xs={8} justifyContent="center">
+   <Grid container item xs={6} justifyContent="center">
     <DropdownSelect />
    </Grid>
-   <Grid container item xs={2} justifyContent="center">
-    <IconButton size="large">
+   <Grid container item xs={3} justifyContent="center">
+    <IconButton
+     size="large"
+     onClick={() => {
+      rightKeyPressed()
+     }}
+    >
      <KeyboardArrowRight fontSize="large" />
     </IconButton>
    </Grid>
   </Grid>
  )
 }
-
-const useStyles = makeStyles(() =>
- createStyles({
-  container: {
-   width: '35%'
-  }
- })
-)
 
 export default MapPatchBrowser
