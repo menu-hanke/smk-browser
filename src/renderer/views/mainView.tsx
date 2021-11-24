@@ -94,8 +94,8 @@ const MainView: React.FC = () => {
   dispatch(setLogData({ logData: [] }))
 
   const arrayOfIDs = propertyIDs
-   .replace(/[\r\n\t]/g, '')
-   .split(',')
+   .trim()
+   .split(/[\s,]+/)
    .filter((string: string) => string)
 
   await Promise.all(
