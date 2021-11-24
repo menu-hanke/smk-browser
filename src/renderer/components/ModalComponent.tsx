@@ -5,7 +5,8 @@ import OpenLayersMap from '../components/OpenLayersMap'
 import MapPatchBrowser from './MapPatchBrowser'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
-import { setModalState } from 'renderer/Store/Actions/data'
+import { setDisplayMap } from 'renderer/Store/Actions/data'
+import ChangeMapButtons from './ChangeMapButtons'
 
 const ModalComponent: React.FC = () => {
  const classes = useStyles()
@@ -13,14 +14,22 @@ const ModalComponent: React.FC = () => {
  const displayMap = useSelector((state: RootState) => state.map.displayMap)
 
  return (
-  <Modal open={displayMap} onClose={() => dispatch(setModalState({ displayMap: false }))} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+  <Modal open={displayMap} onClose={() => dispatch(setDisplayMap({ displayMap: false }))} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
    <Box className={classes.modalContainer}>
     <Grid container direction="column" justifyContent="center" alignItems="center" spacing={2}>
      <Grid container item xs={10} justifyContent="center" alignItems="center">
       <OpenLayersMap />
      </Grid>
      <Grid container item xs={2} justifyContent="center">
-      <MapPatchBrowser />
+      <Grid container item direction="row">
+       <Grid container item xs={3} justifyContent="flex-start" alignItems="center" style={{ paddingLeft: '15px' }}>
+        <ChangeMapButtons />
+       </Grid>
+       <Grid container item xs={6} justifyContent="center" alignItems="center">
+        <MapPatchBrowser />
+       </Grid>
+       <Grid container item xs={3}></Grid>
+      </Grid>
      </Grid>
     </Grid>
    </Box>
