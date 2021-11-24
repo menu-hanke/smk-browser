@@ -40,10 +40,4 @@ interface Map {
  selectedPropertyId: string
  currentPolygonIndices: number[]
  selectedStandIndex: number
- dataToDisplay: DataToDisplay
-}
-
-interface DataToDisplay {
- standFeatures: Object
- patchFeatures: Object
 }
