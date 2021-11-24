@@ -343,7 +343,7 @@ const MainView: React.FC = () => {
       </div>
      </Grid>
     </Grid>
-    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '30px' }}>
+    <Grid container item xs={9} direction="column" alignItems="center" style={{ paddingRight: '27px' }}>
      <LogComponent logData={logData} />
     </Grid>
    </Grid>

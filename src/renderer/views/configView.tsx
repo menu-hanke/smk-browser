@@ -23,7 +23,7 @@ const ConfigView: React.FC = () => {
  }
 
  return (
-  <Grid container spacing={2} style={{ paddingLeft: '30px', paddingRight: '30px' }}>
+  <Grid container spacing={2} style={{ paddingLeft: '27px', paddingRight: '27px' }}>
    <Grid item xs={12}>
     <TextField id="outlined-multiline-static" label="API Key for MML WMTS" value={apiKey} variant="outlined" onChange={apiKeyChange} defaultValue="" fullWidth />
    </Grid>
