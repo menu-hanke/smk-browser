@@ -21,7 +21,7 @@ import GeoJSON from 'ol/format/GeoJSON'
 import xml2js from 'xml2js'
 import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
-import { Style, Stroke, Fill } from 'ol/style'
+import { Style, Stroke, Fill, Text } from 'ol/style'
 
 const apiKey = () => localStorage.getItem('smk-browser.config.apiKey')
 
@@ -167,7 +167,7 @@ const OpenLayersMap: React.FC = () => {
     })
    })
 
-   const standVectorLayerStyle = new Style({
+   const standVectorLayerStyle = (feature : any) => new Style({
     stroke: new Stroke({
      color: '#FEC627',
      //  lineDash: [4],
@@ -175,6 +175,11 @@ const OpenLayersMap: React.FC = () => {
     }),
     fill: new Fill({
      color: 'rgba(0, 0, 255, 0.1)'
+    }),
+    text: new Text({
+        // Place text label and styling here
+        text: ('123'+feature).substring(0,3), // substring hack so that we make use of the 'feature' variable
+        fill: new Fill({color:'#fff'})
     })
    })
 
