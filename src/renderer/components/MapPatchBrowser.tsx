@@ -72,7 +72,7 @@ const MapPatchBrowser: React.FC = () => {
         </IconButton>
       </Grid>
       <Grid container item xs={6} justifyContent="center">
-        <DropdownSelect isDisabled={false} />
+        <DropdownSelect />
       </Grid>
       <Grid container item xs={3} justifyContent="center">
         <IconButton
