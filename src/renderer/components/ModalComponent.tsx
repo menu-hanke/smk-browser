@@ -40,18 +40,13 @@ const ModalComponent: React.FC = () => {
 const useStyles = makeStyles(() =>
   createStyles({
     modalContainer: {
-      position: 'absolute',
-      top: '53%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '98%',
-      height: '75%',
+      position: 'relative',
+      margin: '2em',
       backgroundColor: 'white',
       borderRadius: '5px',
       boxShadow: '24',
-      p: '4',
       border: 'solid black 1px',
-      paddingTop: '10px'
+      padding: '1em'
     }
   })
 )
