@@ -84,7 +84,6 @@ const createWindow = async () => {
   }
  })
 
- mainWindow.removeMenu()
  mainWindow.loadURL(resolveHtmlPath('index.html'))
 
  mainWindow.on('ready-to-show', () => {
@@ -94,6 +93,7 @@ const createWindow = async () => {
   if (process.env.START_MINIMIZED) {
    mainWindow.minimize()
   } else {
+   mainWindow.removeMenu()
    mainWindow.show()
   }
  })
