@@ -16,11 +16,7 @@ const MenuProps = {
   }
 }
 
-interface Props {
-  isDisabled: boolean
-}
-
-const DropdownSelect: React.FC<Props> = ({ isDisabled }: Props) => {
+const DropdownSelect: React.FC = () => {
   const dispatch = useDispatch()
   const foundIDs = useSelector((state: RootState) => state.saveProcess.foundIDs)
   const selectedPropertyId = useSelector((state: RootState) => state.map.selectedPropertyId)
@@ -32,7 +28,6 @@ const DropdownSelect: React.FC<Props> = ({ isDisabled }: Props) => {
         fullWidth
         label="select ID to display"
         value={selectedPropertyId}
-        disabled={isDisabled}
         onChange={(event) => {
           dispatch(setDisplayMap({ displayMap: true }))
           dispatch(setSelectedPropertyIdForMap({ selectedPropertyId: event.target.value }))
