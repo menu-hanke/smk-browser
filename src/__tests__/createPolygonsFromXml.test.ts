@@ -4,8 +4,8 @@ import xml2js from 'xml2js'
 // @ts-ignore
 import wkt from 'wkt'
 import { createPolygonsFromXml } from '../renderer/controllers/createPolygonsFromXml'
-import GeoJSON from 'ol/format/GeoJSON'
-import turf from '@turf/turf'
+// import GeoJSON from 'ol/format/GeoJSON'
+// import turf from '@turf/turf'
 
 describe('createPolygonsFromXml', () => {
   it('should load multiple stands (both eterior-only and stands with single interiors)', async () => {
@@ -54,11 +54,8 @@ describe('createPolygonsFromXml', () => {
   it('should return the stand number', async () => {
     const xmlString = await readFile('src/__tests__/data2-stands.test.xml')
     const xml = await xml2js.parseStringPromise(xmlString)
-    const polygonArray = createPolygonsFromXml(xml)
-
-    const features = new GeoJSON().readFeatures(turf.featureCollection(polygonArray))
-    const properties = features[0].getProperties()
-    const standNumber = properties.standNumber
+    const result = createPolygonsFromXml(xml)
+    const standNumber = result[0].properties.standNumber
     expect(standNumber).toEqual(19)
   })
 })
