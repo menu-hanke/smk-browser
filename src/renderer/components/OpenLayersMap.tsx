@@ -21,12 +21,10 @@ import GeoJSON from 'ol/format/GeoJSON'
 import xml2js from 'xml2js'
 import { createPolygonsFromXml } from 'renderer/controllers/createPolygonsFromXml'
 import * as turf from '@turf/turf'
-import { Style, Stroke, Fill } from 'ol/style'
+import { Style, Stroke, Fill, Text } from 'ol/style'
 import { useSnackbar } from 'notistack'
 
 const apiKey = () => localStorage.getItem('smk-browser.config.apiKey')
-
-// import testData from '../testdata.json'
 
 const projection = new Projection({
   code: 'EPSG:3067',
@@ -174,16 +172,25 @@ const OpenLayersMap: React.FC = () => {
         })
       })
 
-      const standVectorLayerStyle = new Style({
-        stroke: new Stroke({
-          color: '#FEC627',
-          //  lineDash: [4],
-          width: 3
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 0, 255, 0.1)'
+      const standVectorLayerStyle = (feature: any) => {
+        const properties = feature.getProperties()
+
+        return new Style({
+          stroke: new Stroke({
+            color: '#FEC627',
+            //  lineDash: [4],
+            width: 3
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          }),
+          text: new Text({
+            // Text label and styling in here <----
+            text: String(properties.standNumber),
+            fill: new Fill({ color: '#fff' })
+          })
         })
-      })
+      }
 
       // Add new layers
       const polygons = await Promise.all(
