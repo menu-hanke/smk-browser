@@ -107,7 +107,7 @@ const MainView: React.FC = () => {
 
         // _____ Download Data ______
         const fetchURL =
-          'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v1/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
+          'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v2/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
         const response = await fetch(fetchURL + ID)
         const data = await response.json()
 
