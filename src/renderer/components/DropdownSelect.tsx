@@ -29,13 +29,18 @@ const DropdownSelect: React.FC = () => {
         label="select ID to display"
         value={selectedPropertyId}
         onChange={(event) => {
-          dispatch(setDisplayMap({ displayMap: true }))
           dispatch(setSelectedPropertyIdForMap({ selectedPropertyId: event.target.value }))
         }}
         MenuProps={MenuProps}
       >
         {foundIDs.map((object: any) => (
-          <MenuItem key={object.propertyId} value={object.propertyId}>{`propertyID: ${object.propertyId}`}</MenuItem>
+          <MenuItem
+            key={object.propertyId}
+            value={object.propertyId}
+            onClick={() => {
+              dispatch(setDisplayMap({ displayMap: true }))
+            }}
+          >{`propertyID: ${object.propertyId}`}</MenuItem>
         ))}
       </Select>
     </FormControl>
