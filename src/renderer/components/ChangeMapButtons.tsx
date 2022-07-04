@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createStyles, makeStyles } from '@mui/styles'
-import { Grid, Button } from '@material-ui/core'
+import { Grid, Button } from '@mui/material'
 import { useDispatch } from 'react-redux'
 import { setBackgroundMap } from 'renderer/Store/Actions/data'
 

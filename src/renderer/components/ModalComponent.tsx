@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createStyles, makeStyles } from '@mui/styles'
-import { Box, Grid, Modal } from '@material-ui/core'
+import { Box, Grid, Modal } from '@mui/material'
 import OpenLayersMap from '../components/OpenLayersMap'
 import MapPatchBrowser from './MapPatchBrowser'
 import { useDispatch, useSelector } from 'react-redux'

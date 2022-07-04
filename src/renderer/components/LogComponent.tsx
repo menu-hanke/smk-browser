@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createStyles, makeStyles } from '@mui/styles'
-import { Grid } from '@material-ui/core'
+import { Grid } from '@mui/material'
 import { FixedSizeList, ListChildComponentProps } from 'react-window'
 
 interface Log {

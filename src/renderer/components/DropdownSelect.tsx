@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Select, MenuItem, FormControl, InputLabel } from '@material-ui/core'
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'

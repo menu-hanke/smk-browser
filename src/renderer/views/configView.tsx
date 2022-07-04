@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as React from 'react'
-import { Grid, TextField } from '@material-ui/core'
+import { Grid, TextField } from '@mui/material'
 import { setApiKeyToRedux } from 'renderer/Store/Actions/data'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from 'renderer/App'
