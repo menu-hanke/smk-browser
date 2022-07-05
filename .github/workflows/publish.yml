@@ -28,8 +28,7 @@ jobs:
           node-version: 16
 
       - name: Install dependencies
-        run: 
-          npm install
+        run: npm install --legacy-peer-deps
 
       - name: Publish releases
         env:
@@ -44,11 +43,11 @@ jobs:
           npm run postinstall
           npm run build
           npm run package --win
-          
+
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
-            name: SMK-browser
-            path: D:\a\smk-browser\smk-browser\release\build\win-unpacked
-              #  npm exec electron-builder --windows --publish always
-   
+          name: SMK-browser
+          path:
+            D:\a\smk-browser\smk-browser\release\build\win-unpacked
+            #  npm exec electron-builder --windows --publish always
