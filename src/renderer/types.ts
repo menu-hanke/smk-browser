@@ -1,5 +1,7 @@
 export interface ReduxState {
   apiKey: string | null
+  username: string | null
+  password: string | null
   beforeFetch: BeforeFetch
   saveProcess: SaveProcess
   map: Map

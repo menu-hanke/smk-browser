@@ -3,6 +3,8 @@ import { ReduxState } from 'renderer/types'
 
 const initialState: ReduxState = {
   apiKey: '',
+  username: '',
+  password: '',
 
   beforeFetch: {
     propertyIds: '',
@@ -62,6 +64,12 @@ const dataReducer = createReducer(initialState, {
   },
   SET_API_KEY_TO_REDUX: (state, action) => {
     state.apiKey = action.payload.apiKey
+  },
+  SET_USERNAME_TO_REDUX: (state, action) => {
+    state.username = action.payload.username
+  },
+  SET_PASSWORD_TO_REDUX: (state, action) => {
+    state.password = action.payload.password
   },
   SET_BACKGROUND_MAP: (state, action) => {
     state.map.useBackgroundMap = action.payload.useBackgroundMap

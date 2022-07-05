@@ -10,6 +10,8 @@ export const SET_DISPLAY_MAP = 'SET_DISPLAY_MAP'
 export const SET_STAND_FOR_PROPERTYID = 'SET_STAND_FOR_PROPERTYID'
 export const SET_SELECTED_PROPERTYID_FOR_MAP = 'SET_SELECTED_PROPERTYID_FOR_MAP'
 export const SET_API_KEY_TO_REDUX = 'SET_API_KEY_TO_REDUX'
+export const SET_USERNAME_TO_REDUX = 'SET_USERNAME_TO_REDUX'
+export const SET_PASSWORD_TO_REDUX = 'SET_PASSWORD_TO_REDUX'
 export const SET_STAND_INDEX_FOR_MAP = 'SET_STAND_INDEX_FOR_MAP'
 export const SET_CURRENT_POLYGON_INDICES = 'SET_CURRENT_POLYGON_INDICES'
 export const SET_BACKGROUND_MAP = 'SET_BACKGROUND_MAP'
@@ -71,6 +73,16 @@ export const setStandIndexForMap = (data: any) => ({
 
 export const setApiKeyToRedux = (data: any) => ({
   type: SET_API_KEY_TO_REDUX,
+  payload: data
+})
+
+export const setUsernameToRedux = (data: any) => ({
+  type: SET_USERNAME_TO_REDUX,
+  payload: data
+})
+
+export const setPasswordToRedux = (data: any) => ({
+  type: SET_PASSWORD_TO_REDUX,
   payload: data
 })
 
