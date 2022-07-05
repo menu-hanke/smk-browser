@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import * as React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@material-ui/core'
-import DownloadIcon from '@material-ui/icons/CloudDownload'
-import CopyIcon from '@material-ui/icons/FileCopy'
+import { AppBar, Button, Grid, TextField, Toolbar, Typography } from '@mui/material'
+import DownloadIcon from '@mui/icons-material/CloudDownload'
+import CopyIcon from '@mui/icons-material/FileCopy'
 import { useSnackbar } from 'notistack'
 // @ts-ignore
 import wkt from 'wkt'
@@ -19,6 +19,7 @@ import { RootState } from 'renderer/App'
 import { FoundID } from 'renderer/types'
 import { filterStands } from '../controllers/standFilter'
 import ConfigView from './configView'
+import base64 from 'base-64'
 
 const MainView: React.FC = () => {
   const dispatch = useDispatch()
@@ -31,6 +32,8 @@ const MainView: React.FC = () => {
   const foundStandIds = useSelector((state: RootState) => state.saveProcess.foundStandIds)
   const removeDuplicatesState = useSelector((state: RootState) => state.beforeFetch.removeDuplicates)
   const apiKey = useSelector((state: RootState) => state.apiKey)
+  const USERNAME = useSelector((state: RootState) => state.username)
+  const PASSWORD = useSelector((state: RootState) => state.password)
 
   const options = {
     weekday: 'short',
@@ -106,9 +109,20 @@ const MainView: React.FC = () => {
         })
 
         // _____ Download Data ______
-        const fetchURL =
-          'https://beta-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v2/collections/PalstanSijaintitiedot/items?crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
-        const response = await fetch(fetchURL + ID)
+        const credentials = base64.encode(USERNAME + ':' + PASSWORD)
+        const fetchUrl =
+          'https://sopimus-paikkatieto.maanmittauslaitos.fi/kiinteisto-avoin/simple-features/v3/collections/PalstanSijaintitiedot/items?f=json&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F3067&kiinteistotunnuksenEsitysmuoto='
+
+        const response = await fetch(fetchUrl + ID, {
+          headers: new Headers({
+            Authorization: `Basic ${credentials}`
+          })
+        })
+
+        if (response.status === 403) {
+          throw new Error('Invalid credentials. Cannot download data')
+        }
+
         const data = await response.json()
 
         if (data.features.length === 0) {
@@ -122,7 +136,7 @@ const MainView: React.FC = () => {
           )
           return
         }
-        // console.log('Data from first API call: ', data)
+
         const dataString = JSON.stringify(data)
         // eslint-disable-next-line promise/catch-or-return
         await ipcRenderer.invoke('saveFile', {
@@ -150,7 +164,6 @@ const MainView: React.FC = () => {
               const dataAsText = await response.text()
 
               if (dataAsText.includes('<Error>')) {
-                console.log('error code: ', dataAsText)
                 const date = new Date()
                 dispatch(
                   setLogData({
@@ -239,6 +252,10 @@ const MainView: React.FC = () => {
   }
 
   const fetchDataAndAlert = async () => {
+    if (USERNAME === '' || USERNAME === null || PASSWORD === '' || PASSWORD === null) {
+      enqueueSnackbar('Cannot download data without username and password', { variant: 'warning' })
+      return
+    }
     if (propertyIDs === '') {
       enqueueSnackbar('Please add property IDs', { variant: 'error' })
       return
@@ -249,9 +266,19 @@ const MainView: React.FC = () => {
     }
     if (apiKey === '' || apiKey === null) {
       enqueueSnackbar('Cannot display map without API key', { variant: 'warning' })
+      return
     }
+
     dispatch(resetLogData({ logData: [] }))
-    await getData()
+    try {
+      await getData()
+    } catch (error: any) {
+      if (error.message.includes('Invalid credentials')) {
+        enqueueSnackbar('Invalid username or password. Cannot download data', { variant: 'error' })
+        return
+      }
+    }
+
     const date = new Date()
     dispatch(
       setLogData({
